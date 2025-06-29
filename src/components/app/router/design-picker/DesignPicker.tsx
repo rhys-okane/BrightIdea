@@ -51,7 +51,7 @@ export const DesignPicker: FC = () => {
       <section className="flex flex-col items-center gap-6 w-full">
         {serialPort ? (
           <div className="text-green-400">
-            Connected to {serialPort.getInfo().usbVendorId}
+            Connected to {serialPort.getInfo().usbVendorId ?? "unknown"}
           </div>
         ) : (
           <div className="text-red-400">No serial port selected</div>
