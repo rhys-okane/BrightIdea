@@ -8,7 +8,7 @@ import {
   type Grid,
   type RGBBrightnessCell,
 } from "@src/store/types/design/frame/Frame";
-import { useMemo, useState, type FC } from "react";
+import { useEffect, useMemo, useRef, useState, type FC } from "react";
 
 interface Props {
   designId: string;
@@ -23,6 +23,26 @@ export const DesignEditor: FC<Props> = ({ designId }) => {
     MAX_SAFE_BRIGHTNESS,
   ]);
   const [selectedFrameIndex, setSelectedFrameIndex] = useState(0);
+
+  const isMouseDown = useRef<boolean>(false);
+
+  useEffect(() => {
+    const onMouseDown = () => {
+      isMouseDown.current = true;
+    };
+
+    const onMouseUp = () => {
+      isMouseDown.current = false;
+    };
+
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isMouseDown]);
 
   const design = useMemo(() => {
     return designs.find((design) => design.id === designId)!;
@@ -68,7 +88,11 @@ export const DesignEditor: FC<Props> = ({ designId }) => {
       </div>
 
       <div className="flex flex-col">
-        <FrameEditor frame={selectedFrame} onCellClick={onCellClick} />
+        <FrameEditor
+          frame={selectedFrame}
+          onCellClick={onCellClick}
+          isMouseDown={isMouseDown}
+        />
 
         <FrameSelector
           frames={design.frames}

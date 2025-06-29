@@ -4,20 +4,43 @@ import {
   rgbCellToColour,
 } from "@src/store/types/design/frame/Frame";
 import type { FC } from "react";
+import { cva } from "class-variance-authority";
 
 interface Props {
   cell: RGBBrightnessCell;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  className?: string;
+  variant?: "default" | "small";
 }
 
-export const Cell: FC<Props> = ({ cell, onClick }) => {
+const cellClass = cva("border border-black", {
+  variants: {
+    variant: {
+      default: "w-8 h-8",
+      small: "w-2 h-2",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+export const Cell: FC<Props> = ({
+  cell,
+  onMouseEnter,
+  onClick,
+  className,
+  variant = "default",
+}) => {
   return (
     <div
-      className="w-8 h-8 border border-black"
+      className={cellClass({ variant, className })}
       style={{
         backgroundColor: rgbToCss(rgbCellToColour(cell)),
       }}
-      onClick={() => onClick?.()}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
     />
   );
 };

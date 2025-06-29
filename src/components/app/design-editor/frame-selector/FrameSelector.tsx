@@ -1,3 +1,4 @@
+import { FramePreview } from "@src/components/app/shared/FramePreview";
 import type { AnimationFrame } from "@src/store/types/design/frame/Frame";
 import type { FC } from "react";
 
@@ -13,6 +14,10 @@ export const FrameSelector: FC<Props> = ({
   onFrameSelect,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full"></div>
+    <div className="flex flex-col items-center justify-center h-full">
+      {frames.map((frame, index) => (
+        <FramePreview frame={frame} key={index} />
+      ))}
+    </div>
   );
 };
