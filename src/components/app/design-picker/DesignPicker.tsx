@@ -1,6 +1,8 @@
 import { DesignPreview } from "@src/components/app/design-picker/design-preview/DesignPreview";
+import { LED_COLUMN_COUNT, LED_ROW_COUNT } from "@src/constants/LedGrid";
 import { useDesignsState } from "@src/store/hooks/UseDesignsState";
 import { useEditingDesignIdState } from "@src/store/hooks/UseEditingDesignIdState";
+import type { RGBBrightnessCell } from "@src/store/types/design/frame/Frame";
 // import {usePlayingDesignIdState} from "@src/store/hooks/UsePlayingDesignIdState";
 import { useCallback, type FC } from "react";
 import { ulid } from "ulid";
@@ -17,7 +19,12 @@ export const DesignPicker: FC = () => {
       {
         id: newDesignId,
         name: "New Design",
-        frames: [],
+        frames: [
+          {
+            duration: 500,
+            grid: defaultGrid,
+          },
+        ],
       },
     ]);
     setEditingDesignId(newDesignId);
@@ -55,3 +62,10 @@ export const DesignPicker: FC = () => {
     </main>
   );
 };
+
+const defaultGrid = Array.from({ length: LED_ROW_COUNT }, () =>
+  Array.from(
+    { length: LED_COLUMN_COUNT },
+    () => [0, 0, 0, 255] as RGBBrightnessCell
+  )
+);

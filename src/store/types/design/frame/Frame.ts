@@ -3,7 +3,7 @@ export interface AnimationFrame {
    * 2D array representing the LED grid state for this frame.
    * Each value is an rgb array (e.g., [255, 0, 0]) or black ([0,0,0]) for off.
    */
-  grid: RGBBrightnessCell[][];
+  grid: Grid;
   /**
    * Duration in milliseconds this frame is displayed (for animation)
    */
@@ -12,6 +12,7 @@ export interface AnimationFrame {
 
 // Red, Green, Blue, Brightness
 // Each value is in the range 0-255, with brightness as a percentage (0-100).
+export type Grid = RGBBrightnessCell[][];
 export type RGBColour = [number, number, number];
 export type RGBBrightnessCell = [...RGBColour, number];
 
