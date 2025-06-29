@@ -1491,6 +1491,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/w3c-web-serial@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "@types/w3c-web-serial@npm:1.0.8"
+  checksum: 10c0/d8d0974996da8396457aaf41f0925058d60796303e260d6702dcc1788e4148ca4dfa472b5416f226b8c8ab459461c19f8c96f29f4c84492bd555c6aa23ee336b
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:8.35.0":
   version: 8.35.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.35.0"
@@ -3039,6 +3046,7 @@ __metadata:
     "@tailwindcss/vite": "npm:^4.1.11"
     "@types/react": "npm:^19.1.8"
     "@types/react-dom": "npm:^19.1.6"
+    "@types/w3c-web-serial": "npm:^1.0.8"
     "@vitejs/plugin-react-swc": "npm:^3.10.2"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"

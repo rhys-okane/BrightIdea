@@ -1,15 +1,17 @@
-import type {Design} from "./design/Design";
-import type {ZustandSetFunction} from "./UseZustandState";
+import type { Design } from "./design/Design";
+import type { ZustandSetFunction } from "./UseZustandState";
 
 export interface HighBrow {
   designs: Design[];
   editingDesignId: string | undefined;
-  playingDesignId: string | undefined;
+  playingDesignId: "audio" | string | undefined;
+  serialPort: SerialPort | undefined;
 }
 
 export type CreateReducers<T> = {
-  [K in keyof T as `set${Capitalize<string & K>}`]: ZustandSetFunction<T[K]>
+  [K in keyof T as `set${Capitalize<string & K>}`]: ZustandSetFunction<T[K]>;
 };
 
-export type HighBrowReducers = CreateReducers<HighBrow>;
-
+export type HighBrowReducers = CreateReducers<HighBrow> & {
+  setAudioMode: (payload: boolean) => void;
+};

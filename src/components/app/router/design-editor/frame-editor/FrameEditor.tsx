@@ -1,4 +1,4 @@
-import { Cell } from "@src/components/app/design-editor/frame-editor/cell/Cell";
+import { Cell } from "@src/components/app/router/design-editor/frame-editor/cell/Cell";
 import { LED_COLUMN_COUNT } from "@src/constants/LedGrid";
 import { type AnimationFrame } from "@src/store/types/design/frame/Frame";
 import { useCallback, useMemo, type FC, type RefObject } from "react";
@@ -8,9 +8,15 @@ interface Props {
 
   isMouseDown: RefObject<boolean>;
   onCellClick: (rowIndex: number, colIndex: number) => void;
+  onDurationChange: (duration: number) => void;
 }
 
-export const FrameEditor: FC<Props> = ({ frame, onCellClick, isMouseDown }) => {
+export const FrameEditor: FC<Props> = ({
+  frame,
+  onCellClick,
+  isMouseDown,
+  onDurationChange,
+}) => {
   const gridCols = useMemo(() => {
     return {
       gridTemplateColumns: `repeat(${LED_COLUMN_COUNT}, minmax(0, 1fr))`,
@@ -44,6 +50,35 @@ export const FrameEditor: FC<Props> = ({ frame, onCellClick, isMouseDown }) => {
       <p className="text-white">
         Total Cells: {frame.grid.length * frame.grid[0].length}
       </p>
+
+      <div className="flex items-center gap-4 w-full max-w-xs">
+        <label
+          className="text-gray-400 font-medium"
+          htmlFor="frame-duration-slider"
+        >
+          Frame Duration:
+        </label>
+        <input
+          id="frame-duration-slider"
+          type="range"
+          min={10}
+          max={2000}
+          step={10}
+          value={frame.duration}
+          onChange={(e) => onDurationChange(Number(e.target.value))}
+          className="flex-1 accent-blue-500"
+        />
+        <input
+          type="number"
+          min={10}
+          max={2000}
+          step={10}
+          value={frame.duration}
+          onChange={(e) => onDurationChange(Number(e.target.value))}
+          className="w-20 bg-gray-800 text-white rounded px-2 py-1 border border-gray-600"
+        />
+        <span className="text-gray-400 ml-2">ms</span>
+      </div>
     </div>
   );
 };

@@ -7,6 +7,7 @@ const initialState: HighBrow = {
   designs: [],
   editingDesignId: undefined,
   playingDesignId: undefined,
+  serialPort: undefined,
 };
 
 export const useHighBrowStore = create(
@@ -26,6 +27,14 @@ export const useHighBrowStore = create(
           setEditingDesignId: (payload: HighBrow["playingDesignId"]) =>
             set({
               editingDesignId: payload,
+            }),
+          setAudioMode: (payload: boolean) =>
+            set({
+              playingDesignId: payload ? "audio" : undefined,
+            }),
+          setSerialPort: (payload: SerialPort | undefined) =>
+            set({
+              serialPort: payload,
             }),
         }),
         {

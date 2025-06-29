@@ -1,7 +1,3 @@
-// src/constants/LedGrid.ts
-
-// const LEDS_PER_COLUMN = 6;
-
 export const LED_COLUMN_COUNT = 16;
 export const LED_ROW_COUNT = 6; // Change this value to adjust the number of rows
 

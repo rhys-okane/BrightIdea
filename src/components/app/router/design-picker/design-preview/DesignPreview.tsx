@@ -1,4 +1,4 @@
-import { FramePreview } from "@src/components/app/shared/FramePreview";
+import { FramePreview } from "@src/components/app/router/shared/FramePreview";
 import type { Design } from "@src/store/types/design/Design";
 import { useCallback, useEffect, useState, type FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

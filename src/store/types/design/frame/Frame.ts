@@ -1,3 +1,5 @@
+import { LED_ROW_COUNT, LED_COLUMN_COUNT } from "@src/constants/LedGrid";
+
 export interface AnimationFrame {
   /**
    * 2D array representing the LED grid state for this frame.
@@ -23,3 +25,15 @@ export function rgbToCss([r, g, b]: RGBColour): string {
 export function rgbCellToColour(cell: RGBBrightnessCell): RGBColour {
   return [cell[0], cell[1], cell[2]];
 }
+
+export const getNewFrame = (): AnimationFrame => {
+  return {
+    grid: Array.from({ length: LED_ROW_COUNT }, () =>
+      Array.from(
+        { length: LED_COLUMN_COUNT },
+        () => [0, 0, 0, 255] as RGBBrightnessCell
+      )
+    ),
+    duration: 500,
+  };
+};
