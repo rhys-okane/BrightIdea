@@ -1,15 +1,11 @@
 import type { Design } from "@src/store/types/design/Design";
-import type { RGBBrightnessCell } from "@src/store/types/design/frame/Frame";
-import {
-  LED_ROW_COUNT,
-  LED_COLUMN_COUNT,
-  MAX_SAFE_BRIGHTNESS,
-} from "@src/constants/LedGrid";
+import { LED_ROW_COUNT, LED_COLUMN_COUNT } from "@src/constants/LedGrid";
+import type { RGBColour } from "@src/store/types/design/frame/Frame";
 
 type SerialWriter = WritableStreamDefaultWriter<Uint8Array<ArrayBufferLike>>;
 
 // Track current LED states to avoid unnecessary updates
-let currentLedStates: RGBBrightnessCell[][] = [];
+let currentLedStates: RGBColour[][] = [];
 let isInitialized = false;
 
 /**
@@ -18,7 +14,7 @@ let isInitialized = false;
 const initializeLedStates = (): void => {
   currentLedStates = Array(LED_ROW_COUNT)
     .fill(null)
-    .map(() => Array(LED_COLUMN_COUNT).fill([0, 0, 0, 0] as RGBBrightnessCell));
+    .map(() => Array(LED_COLUMN_COUNT).fill([0, 0, 0] as RGBColour));
   isInitialized = true;
 };
 
@@ -49,15 +45,11 @@ const initializeLeds = async (writer: SerialWriter): Promise<void> => {
 /**
  * Check if two LED states are identical
  */
-const areStatesEqual = (
-  state1: RGBBrightnessCell,
-  state2: RGBBrightnessCell
-): boolean => {
+const areStatesEqual = (state1: RGBColour, state2: RGBColour): boolean => {
   return (
     state1[0] === state2[0] &&
     state1[1] === state2[1] &&
-    state1[2] === state2[2] &&
-    state1[3] === state2[3]
+    state1[2] === state2[2]
   );
 };
 
@@ -66,27 +58,22 @@ const areStatesEqual = (
  */
 const updateLeds = async (
   writer: SerialWriter,
-  newGrid: RGBBrightnessCell[][]
+  newGrid: RGBColour[][]
 ): Promise<void> => {
   for (let row = 0; row < LED_ROW_COUNT; row++) {
     for (let col = 0; col < LED_COLUMN_COUNT; col++) {
-      const newState =
-        newGrid[row]?.[col] ?? ([0, 0, 0, 0] as RGBBrightnessCell);
+      const newState = newGrid[row]?.[col] ?? ([0, 0, 0] as RGBColour);
       const currentState = currentLedStates[row][col];
 
       // Only send update if state has changed
       if (!areStatesEqual(currentState, newState)) {
-        const [r, g, b, brightnessPercentage] = newState;
-
-        const realBrightness = Math.round(
-          (brightnessPercentage / 100) * MAX_SAFE_BRIGHTNESS
-        );
-
-        const command = `${r},${g},${b},${realBrightness};`;
+        const [r, g, b] = newState;
+        const index = row * LED_COLUMN_COUNT + col;
+        const command = `${index},${r},${g},${b};`;
         await sendCommand(writer, command);
 
         // Update our tracking state
-        currentLedStates[row][col] = [...newState] as RGBBrightnessCell;
+        currentLedStates[row][col] = [...newState];
       }
     }
   }
@@ -100,6 +87,7 @@ export const playDesign = async (
   design: Design,
   abortSignal?: AbortSignal
 ): Promise<void> => {
+  console.log("Playing design:", design.id);
   if (!writer || !design) {
     console.error("Invalid writer or design");
     return;
@@ -107,48 +95,54 @@ export const playDesign = async (
 
   // Check if already cancelled
   if (abortSignal?.aborted) {
+    console.log("Play operation was cancelled before starting");
     return;
   }
 
   try {
     // Initialize LEDs if not already done
     if (!isInitialized) {
+      console.log("Initializing LEDs for design playback");
       await initializeLeds(writer);
     }
 
     // Check cancellation after initialization
     if (abortSignal?.aborted) {
+      console.log("Aborting design playback due to cancellation signal");
       return;
     }
 
-    // Play each frame in sequence
-    for (const frame of design.frames) {
-      // Check cancellation before each frame
-      if (abortSignal?.aborted) {
-        return;
-      }
+    // Play each frame in sequence, looping until cancelled
+    while (!abortSignal?.aborted) {
+      for (const frame of design.frames) {
+        console.log("Playing frame with duration:", frame.duration);
+        // Check cancellation before each frame
+        if (abortSignal?.aborted) {
+          return;
+        }
 
-      await updateLeds(writer, frame.grid);
+        await updateLeds(writer, frame.grid);
 
-      // Wait for frame duration with cancellation support
-      if (frame.duration > 0) {
-        await new Promise<void>((resolve, reject) => {
-          const timeoutId = setTimeout(resolve, frame.duration);
+        // Wait for frame duration with cancellation support
+        if (frame.duration > 0) {
+          await new Promise<void>((resolve, reject) => {
+            const timeoutId = setTimeout(resolve, frame.duration);
 
-          // Handle cancellation during timeout
-          const onAbort = () => {
-            clearTimeout(timeoutId);
-            reject(new DOMException("Operation was aborted", "AbortError"));
-          };
+            // Handle cancellation during timeout
+            const onAbort = () => {
+              clearTimeout(timeoutId);
+              reject(new DOMException("Operation was aborted", "AbortError"));
+            };
 
-          if (abortSignal?.aborted) {
-            clearTimeout(timeoutId);
-            reject(new DOMException("Operation was aborted", "AbortError"));
-            return;
-          }
+            if (abortSignal?.aborted) {
+              clearTimeout(timeoutId);
+              reject(new DOMException("Operation was aborted", "AbortError"));
+              return;
+            }
 
-          abortSignal?.addEventListener("abort", onAbort, { once: true });
-        });
+            abortSignal?.addEventListener("abort", onAbort, { once: true });
+          });
+        }
       }
     }
   } catch (error) {

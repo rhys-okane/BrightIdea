@@ -14,25 +14,17 @@ export interface AnimationFrame {
 
 // Red, Green, Blue, Brightness
 // Each value is in the range 0-255, with brightness as a percentage (0-100).
-export type Grid = RGBBrightnessCell[][];
+export type Grid = RGBColour[][];
 export type RGBColour = [number, number, number];
-export type RGBBrightnessCell = [...RGBColour, number];
 
 export function rgbToCss([r, g, b]: RGBColour): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-export function rgbCellToColour(cell: RGBBrightnessCell): RGBColour {
-  return [cell[0], cell[1], cell[2]];
-}
-
 export const getNewFrame = (): AnimationFrame => {
   return {
     grid: Array.from({ length: LED_ROW_COUNT }, () =>
-      Array.from(
-        { length: LED_COLUMN_COUNT },
-        () => [0, 0, 0, 255] as RGBBrightnessCell
-      )
+      Array.from({ length: LED_COLUMN_COUNT }, () => [0, 0, 0] as RGBColour)
     ),
     duration: 500,
   };

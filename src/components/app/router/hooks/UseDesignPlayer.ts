@@ -36,7 +36,7 @@ export const useDesignPlayer = () => {
     const reader = serialPort.readable?.getReader();
     const writer = serialPort.writable?.getWriter();
 
-    if (!reader || !writer) {
+    if (!writer) {
       console.error("Failed to get serial port reader or writer");
       return;
     }
@@ -54,14 +54,17 @@ export const useDesignPlayer = () => {
 
     const abortController = new AbortController();
 
-    try {
-      if (design) playDesign(writer, design, abortController.signal);
-    } finally {
-      abortController.abort();
-    }
+    (async () => {
+      try {
+        if (design) await playDesign(writer, design, abortController.signal);
+      } catch {
+        abortController.abort();
+      }
+    })();
 
     return () => {
-      clearInterval(interval);
+      console.log("Cleaning up design player");
+      // clearInterval(interval);
 
       abortController.abort();
       try {

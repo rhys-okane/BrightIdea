@@ -1,16 +1,5 @@
-import {
-  rgbCellToColour,
-  rgbToCss,
-  type RGBBrightnessCell,
-  type RGBColour,
-} from "@src/store/types/design/frame/Frame";
-import {
-  type FC,
-  useCallback,
-  useRef,
-  type ChangeEventHandler,
-  useState,
-} from "react";
+import { rgbToCss, type RGBColour } from "@src/store/types/design/frame/Frame";
+import { type FC, useCallback, useRef, type ChangeEventHandler } from "react";
 
 const PRESET_COLOURS: [number, number, number][] = [
   [0, 0, 0],
@@ -40,8 +29,8 @@ function coloursEqual(a: RGBColour, b: RGBColour): boolean {
 }
 
 type Props = {
-  selectedColour: RGBBrightnessCell;
-  setSelectedColour: (colour: RGBBrightnessCell) => void;
+  selectedColour: RGBColour;
+  setSelectedColour: (colour: RGBColour) => void;
 };
 
 export const ColourPicker: FC<Props> = ({
@@ -49,7 +38,6 @@ export const ColourPicker: FC<Props> = ({
   setSelectedColour,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [brightness, setBrightness] = useState(100);
 
   const onCustomColourChange: ChangeEventHandler<HTMLInputElement> =
     useCallback(
@@ -59,9 +47,9 @@ export const ColourPicker: FC<Props> = ({
         const r = (bigint >> 16) & 255;
         const g = (bigint >> 8) & 255;
         const b = bigint & 255;
-        setSelectedColour([r, g, b, brightness]);
+        setSelectedColour([r, g, b]);
       },
-      [brightness, setSelectedColour]
+      [setSelectedColour]
     );
 
   return (
@@ -69,14 +57,11 @@ export const ColourPicker: FC<Props> = ({
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-5 gap-2 p-2">
           {PRESET_COLOURS.map((colour, idx) => {
-            const isSelected = coloursEqual(
-              colour,
-              rgbCellToColour(selectedColour)
-            );
+            const isSelected = coloursEqual(colour, selectedColour);
             return (
               <div
                 key={idx}
-                onClick={() => setSelectedColour([...colour, brightness])}
+                onClick={() => setSelectedColour([...colour])}
                 className={`w-8 h-8 rounded border-2 ${
                   isSelected ? "border-black" : "border-gray-300"
                 }`}
@@ -103,28 +88,10 @@ export const ColourPicker: FC<Props> = ({
           <span
             className="inline-block w-8 h-8 rounded border-2 border-black"
             style={{
-              backgroundColor: rgbToCss(rgbCellToColour(selectedColour)),
+              backgroundColor: rgbToCss(selectedColour),
             }}
           />
         </p>
-      </div>
-
-      <div className="flex flex-col gap-2 w-full">
-        <span className="flex flex-row gap-2">
-          <p>Brightness:</p>
-          <div>
-            <span className="text-sm">{brightness}%</span>
-          </div>
-        </span>
-        <input
-          type="range"
-          min="0"
-          max={100}
-          value={brightness}
-          onChange={(e) => setBrightness(Number(e.target.value))}
-          className="w-full"
-          aria-label="Brightness"
-        />
       </div>
     </div>
   );

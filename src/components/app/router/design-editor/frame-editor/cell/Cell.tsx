@@ -1,13 +1,9 @@
-import {
-  type RGBBrightnessCell,
-  rgbToCss,
-  rgbCellToColour,
-} from "@src/store/types/design/frame/Frame";
+import { rgbToCss, type RGBColour } from "@src/store/types/design/frame/Frame";
 import type { FC } from "react";
 import { cva } from "class-variance-authority";
 
 interface Props {
-  cell: RGBBrightnessCell;
+  cell: RGBColour;
   onClick?: () => void;
   onMouseEnter?: () => void;
   className?: string;
@@ -37,7 +33,7 @@ export const Cell: FC<Props> = ({
     <div
       className={cellClass({ variant, className })}
       style={{
-        backgroundColor: rgbToCss(rgbCellToColour(cell)),
+        backgroundColor: rgbToCss(cell),
       }}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
