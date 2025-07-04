@@ -4,7 +4,7 @@
 #include <FastLED.h>
 
 #define LED_PIN 12
-#define NUM_LEDS 100  // Adjust as needed
+#define NUM_LEDS 60  // Adjust as needed
 #define BRIGHTNESS  128
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
@@ -19,6 +19,8 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.clear();
   FastLED.show();
+
+  // processCommand("0,255,0,0;");
 }
 
 void loop() {

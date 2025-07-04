@@ -16,8 +16,8 @@ export const DesignPreview: FC<Props> = ({ design }) => {
   const currentFrame = design.frames[currentFrameIndex];
 
   const [designs, setDesigns] = useDesignsState();
-  const [editingDesignId, setEditingDesignId] = useEditingDesignIdState();
-  const [playingDesignId, setPlayingDesignId] = usePlayingDesignIdState();
+  const [, setEditingDesignId] = useEditingDesignIdState();
+  const [, setPlayingDesignId] = usePlayingDesignIdState();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -46,7 +46,7 @@ export const DesignPreview: FC<Props> = ({ design }) => {
       className="relative inline-block group"
       style={{ width: "fit-content" }}
     >
-      <FramePreview frame={currentFrame} key={design.id} />
+      <FramePreview frame={currentFrame} key={design.id} selected={false} />
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
         <button
           className="mx-2 p-2 bg-green-500 text-white rounded hover:bg-green-400 transition"

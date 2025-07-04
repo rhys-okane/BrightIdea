@@ -1,14 +1,13 @@
 import { ColourPicker } from "@src/components/app/router/design-editor/colour-picker/ColourPicker";
 import { FrameEditor } from "@src/components/app/router/design-editor/frame-editor/FrameEditor";
 import { FrameSelector } from "@src/components/app/router/design-editor/frame-selector/FrameSelector";
-import { MAX_SAFE_BRIGHTNESS } from "@src/constants/LedGrid";
 import { useDesignsState } from "@src/store/hooks/UseDesignsState";
 import { useEditingDesignIdState } from "@src/store/hooks/UseEditingDesignIdState";
 import {
   getNewFrame,
   type AnimationFrame,
   type Grid,
-  type RGBBrightnessCell,
+  type RGBColour,
 } from "@src/store/types/design/frame/Frame";
 import {
   useCallback,
@@ -25,11 +24,8 @@ interface Props {
 
 export const DesignEditor: FC<Props> = ({ designId }) => {
   const [designs, setDesigns] = useDesignsState();
-  const [selectedColour, setSelectedColour] = useState<RGBBrightnessCell>([
-    255,
-    255,
-    255,
-    MAX_SAFE_BRIGHTNESS,
+  const [selectedColour, setSelectedColour] = useState<RGBColour>([
+    255, 255, 255,
   ]);
   const [selectedFrameIndex, setSelectedFrameIndex] = useState(0);
   const [, setEditingDesignId] = useEditingDesignIdState();
