@@ -53,6 +53,19 @@ const areStatesEqual = (state1: RGBColour, state2: RGBColour): boolean => {
   );
 };
 
+const indexes = [
+  [5, 11, 17, 23, 29, 35, 41, 47, 53, 59],
+  [4, 10, 16, 22, 28, 34, 40, 46, 52, 58],
+  [3, 9, 15, 21, 27, 33, 39, 45, 51, 57],
+  [2, 8, 14, 20, 26, 32, 38, 44, 50, 56],
+  [1, 7, 13, 19, 25, 31, 37, 43, 49, 55],
+  [0, 6, 12, 18, 24, 30, 36, 42, 48, 54],
+] as const;
+
+export function getIndex(row: number, col: number): number {
+  return indexes[row]?.[col] ?? -1;
+}
+
 /**
  * Update LEDs with new frame data, only sending changes
  */
@@ -68,8 +81,10 @@ const updateLeds = async (
       // Only send update if state has changed
       if (!areStatesEqual(currentState, newState)) {
         const [r, g, b] = newState;
-        const index = row * LED_COLUMN_COUNT + col;
+
+        const index = getIndex(row, col);
         const command = `${index},${r},${g},${b};`;
+
         await sendCommand(writer, command);
 
         // Update our tracking state
