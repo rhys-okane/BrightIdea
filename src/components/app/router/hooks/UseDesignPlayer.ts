@@ -1,6 +1,5 @@
 import { useDesignsState } from "@src/store/hooks/UseDesignsState";
 import { usePlayingDesignIdState } from "@src/store/hooks/UsePlayingDesignIdState";
-import { useSerialPortState } from "@src/store/hooks/UseSerialPortState";
 import type { Design } from "@src/store/types/design/Design";
 import type {
   RGBColour,
@@ -14,10 +13,51 @@ interface DesignPlayerState {
   error: string | null;
 }
 
+const WLED_URL = "http://4.3.2.1/json";
+
+const indexes = [
+  [5, 6, 17, 18, 29, 30, 41, 42, 53, 54],
+  [4, 7, 16, 19, 28, 31, 40, 43, 52, 55],
+  [3, 8, 15, 20, 27, 32, 39, 44, 51, 56],
+  [2, 9, 14, 21, 26, 33, 38, 45, 50, 57],
+  [1, 10, 13, 22, 25, 34, 37, 46, 49, 58],
+  [0, 11, 12, 23, 24, 35, 36, 47, 48, 59],
+] as const;
+
+type LedCommand = [number, [number, number, number]];
+
+async function setLeds(commands: LedCommand[]) {
+  const orderedCommands = commands
+    .sort((a, b) => a[0] - b[0])
+    .map((cmd) => cmd[1]);
+
+  try {
+    console.log("Setting WLED LEDs");
+    const response = await fetch(`${WLED_URL}/si`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        seg: {
+          i: orderedCommands,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("WLED response:", data);
+  } catch (error) {
+    console.error("Error setting WLED LEDs:", error);
+  }
+}
+
 export const useDesignPlayer = (): DesignPlayerState => {
   const [playingDesignId] = usePlayingDesignIdState();
   const [designs] = useDesignsState();
-  const [port] = useSerialPortState();
 
   const [state, setState] = useState<DesignPlayerState>({
     isPlaying: false,
@@ -25,9 +65,6 @@ export const useDesignPlayer = (): DesignPlayerState => {
     error: null,
   });
 
-  const writerRef = useRef<WritableStreamDefaultWriter<Uint8Array> | null>(
-    null
-  );
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const animationStateRef = useRef<{
     design: Design | null;
@@ -46,87 +83,53 @@ export const useDesignPlayer = (): DesignPlayerState => {
   }, [designs, playingDesignId]);
 
   // Function to format LED command
-  const formatLedCommand = (index: number, rgb: RGBColour): string => {
+  const formatLedCommand = (
+    index: number,
+    rgb: RGBColour
+  ): [number, [number, number, number]] => {
     const [r, g, b] = rgb;
-    return `${index},${r},${g},${b};`;
+    return [index, [r, g, b]];
   };
 
   // Function to send a single frame
-  const sendFrame = useCallback(
-    async (frame: AnimationFrame, previousFrame: AnimationFrame | null) => {
-      if (!writerRef.current) return;
+  const sendFrame = useCallback(async (frame: AnimationFrame) => {
+    try {
+      const commands: [number, [number, number, number]][] = [];
 
-      try {
-        const commands: string[] = [];
-
-        // Convert 2D grid to serial commands
-        frame.grid.forEach((row, rowIndex) => {
-          row.forEach((color, colIndex) => {
-            const previousColor = previousFrame?.grid[rowIndex][colIndex];
-
-            if (
-              !previousColor &&
-              color[0] === 0 &&
-              color[1] === 0 &&
-              color[2] === 0
-            ) {
-              // Skip sending command for black (off) LEDs if no previous color
-              return;
-            }
-
-            if (
-              previousColor &&
-              color[0] === previousColor[0] &&
-              color[1] === previousColor[1] &&
-              color[2] === previousColor[2]
-            ) {
-              // Skip sending command if color hasn't changed
-              return;
-            }
-
-            const ledIndex = gridToLedIndex(rowIndex, colIndex);
-            commands.push(formatLedCommand(ledIndex, color));
-          });
+      // Convert 2D grid to serial commands
+      frame.grid.forEach((row, rowIndex) => {
+        row.forEach((color, colIndex) => {
+          const ledIndex = gridToLedIndex(rowIndex, colIndex);
+          commands.push(formatLedCommand(ledIndex, color));
         });
+      });
 
-        console.log(commands);
-        // Send all commands for this frame
+      console.log(commands);
+      await setLeds(commands);
 
-        for (const command of commands) {
-          if (command) {
-            console.log(`Sending command: ${command}`);
-            const encoder = new TextEncoder();
-            await writerRef.current.write(encoder.encode(command));
-            await new Promise((resolve) => setTimeout(resolve, 3));
-          }
-        }
-
-        console.log(
-          `Sent frame ${animationStateRef.current.frameIndex} with ${
-            frame.grid.length * frame.grid[0].length
-          } LEDs`
-        );
-      } catch (error) {
-        console.error("Error sending frame:", error);
-        setState((prev) => ({ ...prev, error: `Send error: ${error}` }));
-      }
-    },
-    []
-  );
+      console.log(
+        `Sent frame ${animationStateRef.current.frameIndex} with ${
+          frame.grid.length * frame.grid[0].length
+        } LEDs`
+      );
+    } catch (error) {
+      console.error("Error sending frame:", error);
+      setState((prev) => ({ ...prev, error: `Send error: ${error}` }));
+    }
+  }, []);
 
   // Function to play the next frame in sequence
   const playNextFrame = useCallback(async () => {
+    console.log("Playing frame");
     const { design, frameIndex } = animationStateRef.current;
 
-    if (!design || !port || !animationStateRef.current.isLooping) return;
+    if (!design || !animationStateRef.current.isLooping) return;
 
     const currentFrame = design.frames[frameIndex];
     if (!currentFrame) return;
 
-    const previousFrame = design.frames[frameIndex - 1] || null;
-
     // Send the current frame
-    await sendFrame(currentFrame, previousFrame);
+    await sendFrame(currentFrame);
 
     // Update state to reflect current frame
     setState((prev) => ({ ...prev, currentFrame: frameIndex }));
@@ -141,30 +144,17 @@ export const useDesignPlayer = (): DesignPlayerState => {
         playNextFrame();
       }
     }, currentFrame.duration);
-  }, [sendFrame, port]);
+  }, [sendFrame]);
 
   // Function to start playing a design
   const startDesign = useCallback(
     async (design: Design) => {
-      if (!port || !design.frames.length) {
-        console.warn("Cannot start design - no port or no frames");
+      if (!design.frames.length) {
+        console.warn("Cannot start design - no frames");
         return;
       }
 
       try {
-        // Get writer if not already available
-        if (!writerRef.current && port.writable) {
-          writerRef.current = port.writable.getWriter();
-        }
-
-        if (!writerRef.current) {
-          setState((prev) => ({
-            ...prev,
-            error: "Cannot get serial port writer",
-          }));
-          return;
-        }
-
         // Stop any current animation
         if (animationTimeoutRef.current) {
           clearTimeout(animationTimeoutRef.current);
@@ -188,10 +178,6 @@ export const useDesignPlayer = (): DesignPlayerState => {
           `Starting design: ${design.name} (${design.frames.length} frames)`
         );
 
-        const encoder = new TextEncoder();
-        await writerRef.current.write(encoder.encode("OFF;"));
-        await new Promise((resolve) => setTimeout(resolve, 3));
-
         // Start the animation
         await playNextFrame();
       } catch (error) {
@@ -199,7 +185,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
         setState((prev) => ({ ...prev, error: `Start error: ${error}` }));
       }
     },
-    [port, playNextFrame]
+    [playNextFrame]
   );
 
   // Function to stop playing
@@ -212,12 +198,6 @@ export const useDesignPlayer = (): DesignPlayerState => {
       }
 
       animationStateRef.current.isLooping = false;
-
-      // Release writer
-      if (writerRef.current) {
-        await writerRef.current.releaseLock();
-        writerRef.current = null;
-      }
 
       setState((prev) => ({
         ...prev,
@@ -244,77 +224,17 @@ export const useDesignPlayer = (): DesignPlayerState => {
     }
   }, [playingDesignId, currentDesign, startDesign, stopDesign]);
 
-  // Effect to set up serial port reader for console logging
-  useEffect(() => {
-    if (!port || !port.readable) return;
-
-    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
-
-    const readSerialData = async () => {
-      try {
-        reader = port.readable!.getReader();
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-
-          // Convert Uint8Array to string and log
-          const decoder = new TextDecoder();
-          const text = decoder.decode(value);
-          console.log("Serial input:", text);
-        }
-      } catch (error) {
-        if (error instanceof Error && error.name !== "NetworkError") {
-          console.error("Error reading serial data:", error);
-        }
-      } finally {
-        if (reader) {
-          try {
-            await reader.releaseLock();
-          } catch {
-            // Ignore release errors
-          }
-        }
-      }
-    };
-
-    readSerialData();
-
-    return () => {
-      if (reader) {
-        reader.cancel().catch(() => {
-          // Ignore cancel errors
-        });
-      }
-    };
-  }, [port]);
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
-      if (writerRef.current) {
-        // @ts-expect-error think the types are wrong lol
-        writerRef.current.releaseLock().catch(() => {
-          // Ignore cleanup errors
-        });
-      }
     };
   }, []);
 
   return state;
 };
-
-const indexes = [
-  [5, 11, 17, 23, 29, 35, 41, 47, 53, 59],
-  [4, 10, 16, 22, 28, 34, 40, 46, 52, 58],
-  [3, 9, 15, 21, 27, 33, 39, 45, 51, 57],
-  [2, 8, 14, 20, 26, 32, 38, 44, 50, 56],
-  [1, 7, 13, 19, 25, 31, 37, 43, 49, 55],
-  [0, 6, 12, 18, 24, 30, 36, 42, 48, 54],
-] as const;
 
 function gridToLedIndex(row: number, col: number): number {
   return indexes[row]?.[col] ?? -1;

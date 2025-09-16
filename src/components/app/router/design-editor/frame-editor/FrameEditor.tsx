@@ -35,7 +35,7 @@ export const FrameEditor: FC<Props> = ({
   return (
     <div className="flex flex-col items-center gap-4 w-full select-none">
       <h2 className="text-2xl font-bold text-white">Frame Editor</h2>
-      <div className="grid gap-y-2 gap-x-6" style={gridCols}>
+      <div className="grid gap-y-2 gap-x-12" style={gridCols}>
         {frame.grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
             <Cell

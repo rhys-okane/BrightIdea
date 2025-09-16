@@ -1,4 +1,5 @@
 import { DesignPreview } from "@src/components/app/router/design-picker/design-preview/DesignPreview";
+import { setLeds } from "@src/components/app/router/wled/Wled";
 import {
   Carousel,
   CarouselContent,
@@ -6,10 +7,8 @@ import {
 } from "@src/components/ui/carousel";
 import { useDesignsState } from "@src/store/hooks/UseDesignsState";
 import { useEditingDesignIdState } from "@src/store/hooks/UseEditingDesignIdState";
-import { useSerialPortState } from "@src/store/hooks/UseSerialPortState";
 import { getNewFrame } from "@src/store/types/design/frame/Frame";
 import { useHighBrowStore } from "@src/store/ZustandStore";
-// import {usePlayingDesignIdState} from "@src/store/hooks/UsePlayingDesignIdState";
 import { useCallback, type FC } from "react";
 import { ulid } from "ulid";
 
@@ -17,7 +16,6 @@ export const DesignPicker: FC = () => {
   const [designs, setDesigns] = useDesignsState();
   // const [playingDesignId, setPlayingDesignId] = usePlayingDesignIdState();
   const [, setEditingDesignId] = useEditingDesignIdState();
-  const [serialPort] = useSerialPortState();
 
   const setAudioMode = useHighBrowStore((state) => state.setAudioMode);
 
@@ -49,14 +47,6 @@ export const DesignPicker: FC = () => {
         </p>
       </header>
       <section className="flex flex-col items-center gap-6 w-full">
-        {serialPort ? (
-          <div className="text-green-400">
-            Connected to {serialPort.getInfo().usbVendorId ?? "unknown"}
-          </div>
-        ) : (
-          <div className="text-red-400">No serial port selected</div>
-        )}
-
         {designs.length === 0 && (
           <div className="text-center text-gray-400">
             <p className="mb-4">
@@ -93,6 +83,13 @@ export const DesignPicker: FC = () => {
           onClick={enableAudioMode}
         >
           Audio Mode
+        </button>
+
+        <button
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+          onClick={setLeds}
+        >
+          Test
         </button>
       </section>
     </main>
