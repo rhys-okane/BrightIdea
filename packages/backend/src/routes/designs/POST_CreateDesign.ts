@@ -1,9 +1,9 @@
-import type {Hono} from "hono";
 import {apiCreateDesignRequestSchema} from "@shared/models/api/APICreateDesignRequest";
 import {designsTable} from "@src/database/schema/Designs";
 import {db} from "@src/database/connection";
 import {ulid} from "ulid";
 import type {HonoApp} from "@src/App";
+import {eq} from "drizzle-orm";
 
 // TODO: CAPTCHA
 
@@ -16,7 +16,15 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 		}
 		const {name, design, createdBy} = body.data;
 
-		const newDesign = await db(context.env.Database)
+		const d1 = db(context.env.Database);
+
+		const nameConflict = await d1.select().from(designsTable).where(eq(designsTable.name, name)).get();
+
+		if (nameConflict) {
+			return context.json({message: "A design with that name already exists."}, 409);
+		}
+
+		const newDesign = await d1
 			.insert(designsTable)
 			.values({
 				name,

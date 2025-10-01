@@ -1,0 +1,20 @@
+meta {
+  name: Get Designs
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{API_BASE_URL}}/designs?pageSize=1&page=2
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageSize: 1
+  page: 2
+}
+
+settings {
+  encodeUrl: true
+}

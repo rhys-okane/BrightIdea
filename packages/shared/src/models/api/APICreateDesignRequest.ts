@@ -6,3 +6,12 @@ export const apiCreateDesignRequestSchema = z.object({
 	createdBy: z.string().min(1),
 	design: z.array(animationFrameSchema).min(1),
 });
+
+export const apiCreateDesignResponseSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	editToken: z.string(),
+	design: z.array(animationFrameSchema),
+	createdBy: z.string(),
+	createdAt: z.iso.date(),
+});

@@ -6,7 +6,7 @@ export const designsTable = sqliteTable("designs", {
 	id: text("id")
 		.primaryKey()
 		.$default(() => ulid()),
-	name: text("name").notNull(),
+	name: text("name").notNull().unique(),
 
 	design: text("design", {
 		mode: "json",
@@ -15,7 +15,7 @@ export const designsTable = sqliteTable("designs", {
 		.notNull(),
 	editToken: text("edit_token").notNull(),
 	createdBy: text("created_by").notNull(),
-	created_at: integer({mode: "timestamp"})
+	createdAt: integer({mode: "timestamp"})
 		.$default(() => new Date())
 		.notNull(),
 });
