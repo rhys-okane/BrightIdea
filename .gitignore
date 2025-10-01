@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.yarn/install-state.gz
+
+# sst
+.sst
+.env*
+!.env.example

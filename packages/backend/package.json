@@ -1,0 +1,20 @@
+{
+	"name": "backend",
+	"type": "module",
+	"packageManager": "yarn@4.9.2",
+	"scripts": {
+		"schema:push": "drizzle-kit push",
+		"schema:migrate": "drizzle-kit migrate"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.44.5",
+		"hono": "4.9.9",
+		"typescript": "5.9.3",
+		"ulid": "^3.0.1"
+	},
+	"devDependencies": {
+		"@types/node": "^24.6.1",
+		"dotenv": "^17.2.3",
+		"drizzle-kit": "^0.31.5"
+	}
+}
