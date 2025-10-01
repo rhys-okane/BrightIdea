@@ -4,7 +4,8 @@
 	"packageManager": "yarn@4.9.2",
 	"scripts": {
 		"schema:push": "drizzle-kit push",
-		"schema:migrate": "drizzle-kit migrate"
+		"migrations:migrate": "drizzle-kit migrate",
+		"migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/"
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.44.5",

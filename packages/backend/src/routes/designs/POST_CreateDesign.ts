@@ -3,10 +3,11 @@ import {apiCreateDesignRequestSchema} from "@shared/models/api/APICreateDesignRe
 import {designsTable} from "@src/database/schema/Designs";
 import {db} from "@src/database/connection";
 import {ulid} from "ulid";
+import type {HonoApp} from "@src/App";
 
 // TODO: CAPTCHA
 
-export function listenForCreateDesignPOSTRequest(app: Hono) {
+export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 	app.post("/designs", async context => {
 		const body = apiCreateDesignRequestSchema.safeParse(await context.req.json());
 
@@ -15,7 +16,7 @@ export function listenForCreateDesignPOSTRequest(app: Hono) {
 		}
 		const {name, design, createdBy} = body.data;
 
-		const newDesign = await db
+		const newDesign = await db(context.env.Database)
 			.insert(designsTable)
 			.values({
 				name,
