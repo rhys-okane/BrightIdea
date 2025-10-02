@@ -110,6 +110,12 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* TODO: Better font */
+@theme {
+  --font-space-mono: "Space Mono", "Comic Sans MS";
+  --default-font-family: 'Space Grotesk', sans-serif;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -118,3 +124,4 @@
     @apply bg-background text-foreground;
   }
 }
+

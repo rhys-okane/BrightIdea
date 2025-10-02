@@ -1,17 +1,36 @@
 import {Cell} from "@src/components/app/router/design-editor/frame-editor/cell/Cell";
 import {LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
-import {useCallback, useMemo, type FC, type RefObject} from "react";
+import {useCallback, useEffect, useMemo, useRef, type FC} from "react";
 import type {AnimationFrame} from "@shared/types/AnimationFrame";
 
 interface Props {
 	frame: AnimationFrame;
 
-	isMouseDown: RefObject<boolean>;
 	onCellClick: (rowIndex: number, colIndex: number) => void;
 	onDurationChange: (duration: number) => void;
 }
 
-export const FrameEditor: FC<Props> = ({frame, onCellClick, isMouseDown, onDurationChange}) => {
+export const FrameEditor: FC<Props> = ({frame, onCellClick, onDurationChange}) => {
+	const isMouseDown = useRef<boolean>(false);
+
+	useEffect(() => {
+		const onMouseDown = () => {
+			isMouseDown.current = true;
+		};
+
+		const onMouseUp = () => {
+			isMouseDown.current = false;
+		};
+
+		window.addEventListener("mousedown", onMouseDown);
+		window.addEventListener("mouseup", onMouseUp);
+
+		return () => {
+			window.removeEventListener("mousedown", onMouseDown);
+			window.removeEventListener("mouseup", onMouseUp);
+		};
+	}, [isMouseDown]);
+
 	const gridCols = useMemo(() => {
 		return {
 			gridTemplateColumns: `repeat(${LED_COLUMN_COUNT}, minmax(0, 1fr))`,
@@ -42,7 +61,6 @@ export const FrameEditor: FC<Props> = ({frame, onCellClick, isMouseDown, onDurat
 					)),
 				)}
 			</div>
-			<p className="text-white">Total Cells: {frame.grid.length * frame.grid[0].length}</p>
 
 			<div className="flex items-center gap-4 w-full max-w-xs">
 				<label className="text-gray-400 font-medium" htmlFor="frame-duration-slider">

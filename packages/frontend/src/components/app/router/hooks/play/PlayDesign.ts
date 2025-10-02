@@ -1,4 +1,4 @@
-import type {Design} from "@src/store/types/design/Design";
+import type {EditingDesign} from "@src/store/types/design/Design";
 import {LED_ROW_COUNT, LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
 import type {RGBColour} from "@shared/types/AnimationFrame";
 
@@ -87,7 +87,11 @@ const updateLeds = async (writer: SerialWriter, newGrid: RGBColour[][]): Promise
 /**
  * Play a design animation on the LED grid with cancellation support
  */
-export const playDesign = async (writer: SerialWriter, design: Design, abortSignal?: AbortSignal): Promise<void> => {
+export const playDesign = async (
+	writer: SerialWriter,
+	design: EditingDesign,
+	abortSignal?: AbortSignal,
+): Promise<void> => {
 	console.log("Playing design:", design.id);
 	if (!writer || !design) {
 		console.error("Invalid writer or design");

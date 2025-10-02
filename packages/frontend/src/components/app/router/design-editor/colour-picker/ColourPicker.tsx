@@ -74,7 +74,7 @@ export const ColourPicker: FC<Props> = ({selectedColour, setSelectedColour}) => 
 					<input type="color" ref={inputRef} onChange={onCustomColourChange} className="hidden" />
 				</div>
 
-				<p className="flex flex-row items-center gap-2">
+				<p className="flex flex-row items-center gap-2 font-semibold text-gray-800">
 					Selected:
 					<span
 						className="inline-block w-8 h-8 rounded border-2 border-black"
