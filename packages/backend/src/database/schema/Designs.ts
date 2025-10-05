@@ -8,7 +8,7 @@ export const designsTable = sqliteTable("designs", {
 		.$default(() => ulid()),
 	name: text("name").notNull().unique(),
 
-	design: text("design", {
+	frames: text("frames", {
 		mode: "json",
 	})
 		.$type<AnimationFrame[]>()

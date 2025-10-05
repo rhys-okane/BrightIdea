@@ -1,4 +1,4 @@
-This app is a React v19 app using Tailwind CSS v4 and Vite. It is named `HighBrow`, a web application for creating designs and animations for a grid of LEDs on the front of a helmet.
+This app is a React v19 app using Tailwind CSS v4 and Vite. It is named `Bright Idea`, a web application for creating designs and animations for a grid of LEDs on the front of a helmet.
 
 Where possible, use the latest React features and best practices. 
 

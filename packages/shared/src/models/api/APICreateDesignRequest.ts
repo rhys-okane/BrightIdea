@@ -1,17 +1,22 @@
 import z from "zod";
 import {animationFrameSchema} from "../../types/AnimationFrame";
+import {stringToDate} from "./utils/StringToDateCodec";
 
 export const apiCreateDesignRequestSchema = z.object({
 	name: z.string().min(1).max(100),
 	createdBy: z.string().min(1),
-	design: z.array(animationFrameSchema).min(1),
+	frames: z.array(animationFrameSchema).min(1),
+	turnstileToken: z.string().min(1),
 });
+
+export type APICreateDesignRequest = z.infer<typeof apiCreateDesignRequestSchema>;
 
 export const apiCreateDesignResponseSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	editToken: z.string(),
-	design: z.array(animationFrameSchema),
+	frames: z.array(animationFrameSchema),
 	createdBy: z.string(),
-	createdAt: z.iso.date(),
+	createdAt: stringToDate,
 });
+export type APICreateDesignResponse = z.infer<typeof apiCreateDesignResponseSchema>;

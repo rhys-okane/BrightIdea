@@ -1,8 +1,7 @@
-import {useDesignsState} from "@src/store/hooks/UseDesignsState";
-import {usePlayingDesignIdState} from "@src/store/hooks/UsePlayingDesignIdState";
-import type {EditingDesign} from "@src/store/types/design/Design";
-import type {RGBColour, AnimationFrame} from "@src/store/types/design/frame/Frame";
-import {useState, useEffect, useCallback, useRef, useMemo} from "react";
+import type {RGBColour, AnimationFrame} from "@shared/types/AnimationFrame";
+import type {PlayableDesign} from "@src/store/types/design/StoreDesign";
+import {useHighBrowStore} from "@src/store/ZustandStore";
+import {useState, useEffect, useCallback, useRef} from "react";
 
 interface DesignPlayerState {
 	isPlaying: boolean;
@@ -51,8 +50,7 @@ async function setLeds(commands: LedCommand[]) {
 }
 
 export const useDesignPlayer = (): DesignPlayerState => {
-	const [playingDesignId] = usePlayingDesignIdState();
-	const [designs] = useDesignsState();
+	const playingDesign = useHighBrowStore(state => state.getPlayingDesign)();
 
 	const [state, setState] = useState<DesignPlayerState>({
 		isPlaying: false,
@@ -62,7 +60,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
 
 	const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const animationStateRef = useRef<{
-		design: EditingDesign | null;
+		design: PlayableDesign | null;
 		frameIndex: number;
 		isLooping: boolean;
 	}>({
@@ -70,12 +68,6 @@ export const useDesignPlayer = (): DesignPlayerState => {
 		frameIndex: 0,
 		isLooping: false,
 	});
-
-	// Get the currently selected design
-	const currentDesign = useMemo(() => {
-		if (!playingDesignId) return null;
-		return designs.find(design => design.id === playingDesignId) || null;
-	}, [designs, playingDesignId]);
 
 	// Function to format LED command
 	const formatLedCommand = (index: number, rgb: RGBColour): [number, [number, number, number]] => {
@@ -140,7 +132,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
 
 	// Function to start playing a design
 	const startDesign = useCallback(
-		async (design: EditingDesign) => {
+		async (design: PlayableDesign) => {
 			if (!design.frames.length) {
 				console.warn("Cannot start design - no frames");
 				return;
@@ -205,14 +197,14 @@ export const useDesignPlayer = (): DesignPlayerState => {
 
 	// Effect to handle playingDesignId changes
 	useEffect(() => {
-		if (playingDesignId && currentDesign) {
+		if (playingDesign) {
 			// Start playing the selected design
-			startDesign(currentDesign);
+			startDesign(playingDesign);
 		} else {
 			// Stop playing when no design is selected
 			stopDesign();
 		}
-	}, [playingDesignId, currentDesign, startDesign, stopDesign]);
+	}, [playingDesign, startDesign, stopDesign]);
 
 	// Cleanup on unmount
 	useEffect(() => {

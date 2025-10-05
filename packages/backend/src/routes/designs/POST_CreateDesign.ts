@@ -14,7 +14,7 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 		if (!body.success) {
 			return context.json({message: "Invalid request", errors: body.error}, 400);
 		}
-		const {name, design, createdBy} = body.data;
+		const {name, frames, createdBy} = body.data;
 
 		const d1 = db(context.env.Database);
 
@@ -29,7 +29,7 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 			.values({
 				name,
 				createdBy: createdBy,
-				design,
+				frames,
 				editToken: ulid(),
 			})
 			.returning()

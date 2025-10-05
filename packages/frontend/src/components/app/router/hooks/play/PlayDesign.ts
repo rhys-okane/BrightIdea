@@ -1,4 +1,4 @@
-import type {EditingDesign} from "@src/store/types/design/Design";
+import type {DesignEditorDesign} from "@src/store/types/design/EditingDesign";
 import {LED_ROW_COUNT, LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
 import type {RGBColour} from "@shared/types/AnimationFrame";
 
@@ -89,7 +89,7 @@ const updateLeds = async (writer: SerialWriter, newGrid: RGBColour[][]): Promise
  */
 export const playDesign = async (
 	writer: SerialWriter,
-	design: EditingDesign,
+	design: DesignEditorDesign,
 	abortSignal?: AbortSignal,
 ): Promise<void> => {
 	console.log("Playing design:", design.id);

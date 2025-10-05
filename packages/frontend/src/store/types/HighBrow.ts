@@ -1,11 +1,23 @@
-import type {EditingDesign} from "./design/Design";
 import type {ZustandSetFunction} from "./UseZustandState";
+import type {
+	MyStoreDesign,
+	NewStoreDesign,
+	PlayableDesign,
+	SomeoneElsesStoreDesign,
+} from "@src/store/types/design/StoreDesign";
 
 export interface HighBrow {
-	designs: EditingDesign[];
-	editingDesignId: string | undefined;
-	playingDesignId: "audio" | string | undefined;
-	serialPort: SerialPort | undefined;
+	isLoadingDesigns: boolean;
+	othersDesigns: SomeoneElsesStoreDesign[];
+	myDesigns: MyStoreDesign[];
+	editingDesign: MyStoreDesign | NewStoreDesign | undefined;
+	playingDesign:
+		| "audio"
+		| {
+				id: string;
+				isMine: boolean;
+		  }
+		| undefined;
 }
 
 export type CreateReducers<T> = {
@@ -14,4 +26,6 @@ export type CreateReducers<T> = {
 
 export type HighBrowReducers = CreateReducers<HighBrow> & {
 	setAudioMode: (payload: boolean) => void;
+	getPlayingDesign: () => PlayableDesign | undefined;
+	storeMyDesign: (design: MyStoreDesign) => void;
 };

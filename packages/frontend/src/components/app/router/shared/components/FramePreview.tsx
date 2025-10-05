@@ -1,4 +1,4 @@
-import {Cell} from "@src/components/app/router/design-editor/frame-editor/cell/Cell";
+import {Cell} from "@src/components/app/router/design-editor/components/frame-editor/cell/Cell";
 import {LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
 import type {FC} from "react";
 import type {AnimationFrame} from "@shared/types/AnimationFrame";

@@ -10,18 +10,6 @@ export default $config({
 		};
 	},
 	async run() {
-		new sst.cloudflare.StaticSite("Frontend", {
-			path: "packages/frontend",
-			build: {
-				command: "yarn build",
-				output: "dist",
-			},
-			environment: {
-				VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: process.env.CLOUDFLARE_TURNSTILE_SITE_KEY,
-				VITE_CLOUDFLARE_TURNSTILE_SECRET_KEY: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
-			},
-		});
-
 		const database = new sst.cloudflare.D1("Database");
 
 		const databaseId = database.databaseId.apply(id => new sst.Secret("ProjectDatabaseId", id));
@@ -34,6 +22,21 @@ export default $config({
 			link: [database, databaseId, turnstileSiteKey, turnstileSecretKey],
 			handler: "packages/backend/src/App.ts",
 		});
+
+		hono.url.apply(
+			url =>
+				new sst.cloudflare.StaticSite("Frontend", {
+					path: "packages/frontend",
+					build: {
+						command: "yarn build",
+						output: "dist",
+					},
+					environment: {
+						VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: process.env.CLOUDFLARE_TURNSTILE_SITE_KEY,
+						VITE_API_URL: url,
+					},
+				}),
+		);
 
 		return {
 			api: hono.url,

@@ -1,35 +1,70 @@
-import {Cell} from "@src/components/app/router/design-editor/frame-editor/cell/Cell";
+import {Cell} from "@src/components/app/router/design-editor/components/frame-editor/cell/Cell";
 import {LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
 import {useCallback, useEffect, useMemo, useRef, type FC} from "react";
-import type {AnimationFrame} from "@shared/types/AnimationFrame";
+import type {AnimationFrame, Grid, RGBColour} from "@shared/types/AnimationFrame";
+import {ShiftButton} from "@src/components/app/router/design-editor/components/frame-editor/shift-button/ShiftButton";
 
 interface Props {
 	frame: AnimationFrame;
+	selectedColour: RGBColour;
 
-	onCellClick: (rowIndex: number, colIndex: number) => void;
+	onFrameChange: (frame: AnimationFrame) => void;
 	onDurationChange: (duration: number) => void;
 }
 
-export const FrameEditor: FC<Props> = ({frame, onCellClick, onDurationChange}) => {
-	const isMouseDown = useRef<boolean>(false);
+export const FrameEditor: FC<Props> = ({frame, selectedColour, onFrameChange, onDurationChange}) => {
+	const mouseButtonDown = useRef<"left" | "right" | undefined>(undefined);
+
+	const onCellClick = useCallback(
+		(mouseButton: "left" | "right", clickedRowIndex: number, clickedColumnIndex: number) => {
+			// Update the selected frame with the new colour
+			const updatedGrid: Grid = frame.grid.map((row, rIdx) =>
+				row.map((cell, cIdx) => {
+					if (rIdx === clickedRowIndex && cIdx === clickedColumnIndex) {
+						return mouseButton === "left" ? [...selectedColour] : [0, 0, 0];
+					}
+
+					return cell;
+				}),
+			);
+
+			const updatedFrame: AnimationFrame = {
+				...frame,
+				grid: updatedGrid,
+			};
+
+			onFrameChange(updatedFrame);
+		},
+		[frame, onFrameChange, selectedColour],
+	);
 
 	useEffect(() => {
-		const onMouseDown = () => {
-			isMouseDown.current = true;
+		const onMouseDown = (event: MouseEvent) => {
+			if (event.button === 0) {
+				mouseButtonDown.current = "left";
+			} else if (event.button === 2) {
+				mouseButtonDown.current = "right";
+			}
 		};
 
 		const onMouseUp = () => {
-			isMouseDown.current = false;
+			mouseButtonDown.current = undefined;
 		};
 
+		const onContextMenu = (e: MouseEvent) => {
+			e.preventDefault();
+		};
+
+		window.addEventListener("contextmenu", onContextMenu);
 		window.addEventListener("mousedown", onMouseDown);
 		window.addEventListener("mouseup", onMouseUp);
 
 		return () => {
+			window.removeEventListener("contextmenu", onContextMenu);
 			window.removeEventListener("mousedown", onMouseDown);
 			window.removeEventListener("mouseup", onMouseUp);
 		};
-	}, [isMouseDown]);
+	}, [mouseButtonDown]);
 
 	const gridCols = useMemo(() => {
 		return {
@@ -39,27 +74,31 @@ export const FrameEditor: FC<Props> = ({frame, onCellClick, onDurationChange}) =
 
 	const onMouseEnter = useCallback(
 		(rowIndex: number, colIndex: number) => {
-			if (isMouseDown?.current) {
-				onCellClick(rowIndex, colIndex);
+			if (mouseButtonDown?.current) {
+				onCellClick(mouseButtonDown.current, rowIndex, colIndex);
 			}
 		},
-		[isMouseDown, onCellClick],
+		[mouseButtonDown, onCellClick],
 	);
 
 	return (
 		<div className="flex flex-col items-center gap-4 w-full select-none">
 			<h2 className="text-2xl font-bold text-white">Frame Editor</h2>
 			<div className="grid gap-y-2 gap-x-12" style={gridCols}>
+				<ShiftButton direction="Up" frame={frame} onFrameChange={onFrameChange} />
+
 				{frame.grid.map((row, rowIndex) =>
 					row.map((cell, colIndex) => (
 						<Cell
 							key={`${rowIndex}-${colIndex}`}
 							cell={cell}
-							onClick={() => onCellClick(rowIndex, colIndex)}
+							onClick={() => onCellClick("left", rowIndex, colIndex)}
 							onMouseEnter={() => onMouseEnter(rowIndex, colIndex)}
 						/>
 					)),
 				)}
+
+				<ShiftButton direction="Down" frame={frame} onFrameChange={onFrameChange} />
 			</div>
 
 			<div className="flex items-center gap-4 w-full max-w-xs">
