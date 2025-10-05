@@ -8,7 +8,7 @@ export class CreateDesignError extends Error {
 	constructor(
 		message: string,
 		public readonly statusCode: number,
-		public readonly type: "conflict" | "network" | "unknown",
+		public readonly type: "conflict" | "network" | "unknown" | "captcha",
 	) {
 		super(message);
 		this.name = "CreateDesignError";
@@ -26,6 +26,10 @@ export const apiCreateDesign = async (input: APICreateDesignRequest): Promise<AP
 
 	if (response.status === 409) {
 		throw new CreateDesignError("Design with the same name already exists", 409, "conflict");
+	}
+
+	if (response.status === 403) {
+		throw new CreateDesignError("CAPTCHA validation failed", 403, "captcha");
 	}
 
 	if (!response.ok) {

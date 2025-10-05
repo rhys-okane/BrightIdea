@@ -4,8 +4,7 @@ import {db} from "@src/database/connection";
 import {ulid} from "ulid";
 import type {HonoApp} from "@src/App";
 import {eq} from "drizzle-orm";
-
-// TODO: CAPTCHA
+import {validateTurnstileToken} from "@src/routes/designs/utils/ValidateTurnstileToken";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 	app.post("/designs", async context => {
@@ -14,7 +13,15 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 		if (!body.success) {
 			return context.json({message: "Invalid request", errors: body.error}, 400);
 		}
-		const {name, frames, createdBy} = body.data;
+		const {name, frames, createdBy, turnstileToken} = body.data;
+
+		const ip = context.req.header("CF-Connecting-IP") || context.req.header("X-Forwarded-For") || "unknown";
+
+		const turnstileResult = await validateTurnstileToken(turnstileToken, ip);
+
+		if (!turnstileResult.success) {
+			return context.json({message: "CAPTCHA validation failed", errors: turnstileResult.errors}, 403);
+		}
 
 		const d1 = db(context.env.Database);
 
