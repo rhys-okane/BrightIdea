@@ -3,6 +3,7 @@ import {
 	type APICreateDesignRequest,
 	type APICreateDesignResponse,
 } from "@shared/models/api/APICreateDesignRequest";
+import {API_URL} from "@src/lib/api/constants/ApiConstants";
 
 export class CreateDesignError extends Error {
 	constructor(
@@ -16,7 +17,7 @@ export class CreateDesignError extends Error {
 }
 
 export const apiCreateDesign = async (input: APICreateDesignRequest): Promise<APICreateDesignResponse> => {
-	const response = await fetch(`${import.meta.env.VITE_API_URL}/designs`, {
+	const response = await fetch(`${API_URL}/designs`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

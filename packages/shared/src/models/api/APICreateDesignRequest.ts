@@ -14,7 +14,8 @@ export type APICreateDesignRequest = z.infer<typeof apiCreateDesignRequestSchema
 export const apiCreateDesignResponseSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	editToken: z.string(),
+	// TODO: Should this be a JWT of some kind?
+	editToken: z.ulid(),
 	frames: z.array(animationFrameSchema),
 	createdBy: z.string(),
 	createdAt: stringToDate,

@@ -10,6 +10,7 @@
 	"dependencies": {
 		"drizzle-orm": "^0.44.5",
 		"hono": "4.9.9",
+		"jose": "^6.1.0",
 		"typescript": "5.9.3",
 		"ulid": "^3.0.1"
 	},

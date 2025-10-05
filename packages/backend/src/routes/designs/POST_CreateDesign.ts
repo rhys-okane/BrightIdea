@@ -1,4 +1,4 @@
-import {apiCreateDesignRequestSchema} from "@shared/models/api/APICreateDesignRequest";
+import {apiCreateDesignRequestSchema, type APICreateDesignResponse} from "@shared/models/api/APICreateDesignRequest";
 import {designsTable} from "@src/database/schema/Designs";
 import {db} from "@src/database/connection";
 import {ulid} from "ulid";
@@ -31,7 +31,7 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 			return context.json({message: "A design with that name already exists."}, 409);
 		}
 
-		const newDesign = await d1
+		const newDesign: APICreateDesignResponse = await d1
 			.insert(designsTable)
 			.values({
 				name,

@@ -10,6 +10,10 @@ import {usePlayingDesignState} from "@src/store/hooks/UsePlayingDesignState";
 import {useEditingDesignState} from "@src/store/hooks/UseEditingDesignState";
 import {FramePreviewWithOverlay} from "@src/components/app/router/shared/FramePreviewWIthOverlay";
 import {FramePreviewOverlayButton} from "@src/components/app/router/shared/button/FramePreviewOverlayButton";
+import {CautionDialog} from "@src/components/app/router/design-editor/components/CautionDialog";
+import {deleteDesign} from "@src/lib/api/DeleteDesign";
+import {toast} from "react-toastify";
+import {useHighBrowStore} from "@src/store/ZustandStore";
 
 interface Props {
 	design: PlayableDesign;
@@ -21,6 +25,7 @@ export const DesignPreview: FC<Props> = ({design}) => {
 
 	const [, setEditingDesign] = useEditingDesignState();
 	const [, setPlayingDesignId] = usePlayingDesignState();
+	const deleteDesignFromStore = useHighBrowStore(state => state.deleteMyDesign);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -58,9 +63,31 @@ export const DesignPreview: FC<Props> = ({design}) => {
 		[setEditingDesign],
 	);
 
-	const onDesignDelete = useCallback((design: MyStoreDesign) => {
-		// setDesigns(designs.filter(d => d.id !== design.id));
-	}, []);
+	const onDesignDelete = useCallback(
+		async (design: MyStoreDesign) => {
+			const loadingId = toast.loading("Deleting design...", {autoClose: false});
+			try {
+				await deleteDesign(design);
+				deleteDesignFromStore(design.id);
+
+				toast.update(loadingId, {
+					render: "Design deleted successfully.",
+					type: "success",
+					autoClose: 3000,
+					isLoading: false,
+				});
+			} catch (error) {
+				console.error("Failed to delete design", error);
+				toast.update(loadingId, {
+					render: "Failed to delete design.",
+					type: "error",
+					autoClose: 3000,
+					isLoading: false,
+				});
+			}
+		},
+		[deleteDesignFromStore],
+	);
 
 	return (
 		<div className="relative inline-block group" style={{width: "fit-content"}}>
@@ -83,13 +110,18 @@ export const DesignPreview: FC<Props> = ({design}) => {
 							onClick={() => onDesignEdit(design)}
 						/>
 
-						<FramePreviewOverlayButton
-							ariaLabel="Delete design"
-							tooltip="Delete and unpublish your design"
-							icon={faTrashCan}
-							variant={"danger"}
-							onClick={() => onDesignDelete(design)}
-						/>
+						<CautionDialog
+							title="Delete design"
+							description="Are you sure you want to delete this design? This action cannot be undone."
+							onConfirm={() => onDesignDelete(design)}
+						>
+							<FramePreviewOverlayButton
+								ariaLabel="Delete design"
+								tooltip="Delete and unpublish your design"
+								icon={faTrashCan}
+								variant={"danger"}
+							/>
+						</CautionDialog>
 					</>
 				)}
 				{!design.isMine && (

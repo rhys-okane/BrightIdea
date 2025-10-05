@@ -40,7 +40,7 @@ export const DesignPicker: FC = () => {
 		<main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center w-full">
 			<header className="mb-8 text-center">
 				<h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">Bright Idea</h1>
-				<p className="text-lg text-gray-400">Create designs and animations for your helmet visor LEDs</p>
+				<p className="text-lg text-gray-400">Work it harder, make it better</p>
 			</header>
 			<section className="flex flex-col items-center gap-6 w-full">
 				<div className="w-full flex flex-col items-center gap-4">

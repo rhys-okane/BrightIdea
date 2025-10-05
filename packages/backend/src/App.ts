@@ -1,4 +1,5 @@
 import type {D1Database} from "@cloudflare/workers-types";
+import {listenForDeleteDesignDELETERequest} from "@src/routes/designs/:id/DELETE_DeleteDesign";
 import {listenForGetDesignsGETRequest} from "@src/routes/designs/GET_GetAllDesigns";
 import {listenForCreateDesignPOSTRequest} from "@src/routes/designs/POST_CreateDesign";
 import {Hono} from "hono";
@@ -15,5 +16,6 @@ app.use("*", cors());
 
 listenForGetDesignsGETRequest(app);
 listenForCreateDesignPOSTRequest(app);
+listenForDeleteDesignDELETERequest(app);
 
 export default app;

@@ -28,4 +28,5 @@ export type HighBrowReducers = CreateReducers<HighBrow> & {
 	setAudioMode: (payload: boolean) => void;
 	getPlayingDesign: () => PlayableDesign | undefined;
 	storeMyDesign: (design: MyStoreDesign) => void;
+	deleteMyDesign: (designId: string) => void;
 };

@@ -18,4 +18,7 @@ export const designsTable = sqliteTable("designs", {
 	createdAt: integer({mode: "timestamp"})
 		.$default(() => new Date())
 		.notNull(),
+	updatedAt: integer({mode: "timestamp"})
+		.$default(() => new Date())
+		.notNull(),
 });

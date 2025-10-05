@@ -49,6 +49,11 @@ export const useHighBrowStore = create(
 							myDesigns: [...get().myDesigns.filter(d => d.id !== design.id), design],
 						}));
 					},
+					deleteMyDesign: (designId: string) => {
+						set(() => ({
+							myDesigns: get().myDesigns.filter(d => d.id !== designId),
+						}));
+					},
 
 					getPlayingDesign: (): PlayableDesign | undefined => {
 						const designInfo = get().playingDesign;

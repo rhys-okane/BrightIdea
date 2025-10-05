@@ -16,7 +16,7 @@ const buttonVariants = cva("mx-2 p-2 text-white rounded transition", {
 });
 
 interface Props {
-	onClick: () => void;
+	onClick?: () => void;
 	ariaLabel: string;
 	className?: string;
 	tooltip: string;
