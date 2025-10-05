@@ -8,6 +8,7 @@
 		"migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "^0.7.3",
 		"drizzle-orm": "^0.44.5",
 		"hono": "4.9.9",
 		"jose": "^6.1.0",

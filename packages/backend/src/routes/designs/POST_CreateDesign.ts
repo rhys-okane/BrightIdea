@@ -5,18 +5,14 @@ import {ulid} from "ulid";
 import type {HonoApp} from "@src/App";
 import {eq} from "drizzle-orm";
 import {validateTurnstileToken} from "@src/routes/designs/utils/ValidateTurnstileToken";
+import {getIp} from "@src/routes/designs/utils/GetIp";
+import {zValidator} from "@hono/zod-validator";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
-	app.post("/designs", async context => {
-		const body = apiCreateDesignRequestSchema.safeParse(await context.req.json());
+	app.post("/designs", zValidator("json", apiCreateDesignRequestSchema), async context => {
+		const {name, frames, createdBy, turnstileToken} = context.req.valid("json");
 
-		if (!body.success) {
-			return context.json({message: "Invalid request", errors: body.error}, 400);
-		}
-		const {name, frames, createdBy, turnstileToken} = body.data;
-
-		const ip = context.req.header("CF-Connecting-IP") || context.req.header("X-Forwarded-For") || "unknown";
-
+		const ip = getIp(context);
 		const turnstileResult = await validateTurnstileToken(turnstileToken, ip);
 
 		if (!turnstileResult.success) {

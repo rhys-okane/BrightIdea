@@ -11,7 +11,7 @@ import {CautionDialog} from "@src/components/app/router/design-editor/components
 import {Turnstile, type TurnstileInstance} from "@marsidev/react-turnstile";
 import type {BaseStoreDesign, EditableStoreDesign} from "@src/store/types/design/StoreDesign";
 import {TooltipWrapper} from "@src/components/ui/derived/TooltipWrapper";
-import {useCreateDesignInApi} from "@src/components/app/router/design-editor/hooks/UseCreateDesignInApi";
+import {useStoreDesignInApi} from "@src/components/app/router/design-editor/hooks/UseStoreDesignInApi";
 
 interface Props {
 	design: EditableStoreDesign;
@@ -23,7 +23,7 @@ export const DesignEditor: FC<Props> = ({design, setEditingDesign}) => {
 	const [selectedFrameIndex, setSelectedFrameIndex] = useState(0);
 	const [, setEditingDesignId] = useEditingDesignState();
 	const turnstyleRef = useRef<TurnstileInstance>(null);
-	const createDesignInApi = useCreateDesignInApi(turnstyleRef);
+	const storeDesignInApi = useStoreDesignInApi(turnstyleRef);
 
 	const selectedFrame = useMemo(() => {
 		return design.frames[selectedFrameIndex];
@@ -70,13 +70,8 @@ export const DesignEditor: FC<Props> = ({design, setEditingDesign}) => {
 	const onDialogConfirm = useCallback(() => {
 		if (!isValid) return;
 
-		if (design.isNew) {
-			createDesignInApi(design);
-			return;
-		}
-
-		// TODO: Edit
-	}, [createDesignInApi, design, isValid]);
+		storeDesignInApi(design);
+	}, [storeDesignInApi, design, isValid]);
 
 	return (
 		<main className="min-h-screen bg-neutral-950 flex text-white w-full py-4 flex-col justify-between items-stretch">

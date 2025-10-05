@@ -13,6 +13,13 @@ const app = new Hono<{
 export type HonoApp = typeof app;
 
 app.use("*", cors());
+app.use("*", async (context, next) => {
+	await next();
+
+	if (context.error) {
+		console.error(JSON.stringify(context.error));
+	}
+});
 
 listenForGetDesignsGETRequest(app);
 listenForCreateDesignPOSTRequest(app);

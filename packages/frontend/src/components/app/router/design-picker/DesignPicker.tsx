@@ -1,3 +1,4 @@
+import {daftPunkOneLiners} from "@src/components/app/router/design-picker/constants/DaftPunkOneLiners";
 import {DesignCarousel} from "@src/components/app/router/design-picker/design-carousel/DesignCarousel";
 import {useApiDesignSync} from "@src/components/app/router/design-picker/hooks/UseApiDesignSync";
 import {Spinner} from "@src/components/ui/spinner";
@@ -36,11 +37,15 @@ export const DesignPicker: FC = () => {
 
 	useApiDesignSync();
 
+	const oneLiner = useMemo(() => {
+		return daftPunkOneLiners[Math.floor(Math.random() * daftPunkOneLiners.length)];
+	}, []);
+
 	return (
 		<main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center w-full">
 			<header className="mb-8 text-center">
 				<h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">Bright Idea</h1>
-				<p className="text-lg text-gray-400">Work it harder, make it better</p>
+				<p className="text-lg text-gray-400">{oneLiner}</p>
 			</header>
 			<section className="flex flex-col items-center gap-6 w-full">
 				<div className="w-full flex flex-col items-center gap-4">

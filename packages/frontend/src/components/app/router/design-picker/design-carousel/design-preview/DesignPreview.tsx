@@ -11,7 +11,7 @@ import {useEditingDesignState} from "@src/store/hooks/UseEditingDesignState";
 import {FramePreviewWithOverlay} from "@src/components/app/router/shared/FramePreviewWIthOverlay";
 import {FramePreviewOverlayButton} from "@src/components/app/router/shared/button/FramePreviewOverlayButton";
 import {CautionDialog} from "@src/components/app/router/design-editor/components/CautionDialog";
-import {deleteDesign} from "@src/lib/api/DeleteDesign";
+import {apiDeleteDesign} from "@src/lib/api/DeleteDesign";
 import {toast} from "react-toastify";
 import {useHighBrowStore} from "@src/store/ZustandStore";
 
@@ -67,7 +67,9 @@ export const DesignPreview: FC<Props> = ({design}) => {
 		async (design: MyStoreDesign) => {
 			const loadingId = toast.loading("Deleting design...", {autoClose: false});
 			try {
-				await deleteDesign(design);
+				// TODO: add turnstile here
+				alert("Request will fail due to lack of turnstile, TODO:");
+				await apiDeleteDesign(design);
 				deleteDesignFromStore(design.id);
 
 				toast.update(loadingId, {
