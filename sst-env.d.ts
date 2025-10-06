@@ -6,30 +6,6 @@
 import "sst"
 declare module "sst" {
   export interface Resource {
-    "Frontend": {
-      "type": "sst.cloudflare.StaticSite"
-      "url": string
-    }
-    "ProjectDatabaseId": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "TurnstileSecretKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "TurnstileSiteKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-  }
-}
-// cloudflare 
-import * as cloudflare from "@cloudflare/workers-types";
-declare module "sst" {
-  export interface Resource {
-    "Database": cloudflare.D1Database
-    "Hono": cloudflare.Service
   }
 }
 

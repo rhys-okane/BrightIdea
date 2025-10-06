@@ -26,6 +26,6 @@ dist-ssr
 .yarn/install-state.gz
 
 # sst
-.sst
+.sst*
 .env*
 !.env.example
