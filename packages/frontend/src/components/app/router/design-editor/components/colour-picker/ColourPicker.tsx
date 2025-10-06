@@ -97,11 +97,15 @@ export const ColourPicker: FC<Props> = ({
         <p className="flex flex-row items-center gap-2 font-semibold text-gray-800">
           Selected:
           <span
-            className="inline-block w-8 h-8 rounded border-2 border-black"
+            className="w-8 h-8 rounded border-2 border-black flex items-center justify-center"
             style={{
               backgroundColor: rgbToCss(selectedColour),
             }}
-          />
+          >
+            {isEraserSelected && (
+              <EraserIcon className="h-5 w-5" color="white" />
+            )}
+          </span>
         </p>
       </div>
     </div>
