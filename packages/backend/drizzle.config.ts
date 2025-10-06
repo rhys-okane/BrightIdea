@@ -3,15 +3,11 @@ import {defineConfig} from "drizzle-kit";
 import path from "path";
 import outputs from "../../.sst/outputs.json" with {type: "json"};
 
-const {parsed: env} = dotenv.config({
+dotenv.config({
 	path: path.resolve(__dirname, "../../.env"),
 });
 
-if (!env) {
-	throw new Error("Failed to load .env file");
-}
-
-if (!env.CLOUDFLARE_DEFAULT_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+if (!process.env.CLOUDFLARE_DEFAULT_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN) {
 	throw new Error("Missing required environment variables");
 }
 
@@ -22,8 +18,8 @@ export default defineConfig({
 	dialect: "sqlite",
 	driver: "d1-http",
 	dbCredentials: {
-		accountId: env.CLOUDFLARE_DEFAULT_ACCOUNT_ID,
+		accountId: process.env.CLOUDFLARE_DEFAULT_ACCOUNT_ID,
 		databaseId: outputs.databaseId,
-		token: env.CLOUDFLARE_API_TOKEN,
+		token: process.env.CLOUDFLARE_API_TOKEN,
 	},
 });
