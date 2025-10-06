@@ -87,7 +87,7 @@ export const DesignEditor: FC<Props> = ({ design, setEditingDesign }) => {
   }, [storeDesignInApi, design, isValid]);
 
   return (
-    <main className="min-h-screen bg-neutral-950 flex text-white w-full py-4 flex-col justify-between items-stretch">
+    <main className="min-h-screen bg-neutral-900 flex text-white w-full py-4 flex-col justify-between items-stretch">
       <nav className="flex items-center w-full justify-center">
         <div className="flex flex-col mb-4 gap-4">
           <div className="flex items-center justify-between w-full flex-row gap-5">
