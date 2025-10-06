@@ -83,7 +83,7 @@ export const DesignPicker: FC = () => {
           {!showLoadingSpinner && othersDesigns.length === 0 && (
             <div className="text-center text-gray-400">
               <p className="mb-4">
-                Nobody has downloaded this design yet :-(<br></br> Be the first!
+                No-one has created a design yet :-(<br></br> Be the first!
               </p>
             </div>
           )}
