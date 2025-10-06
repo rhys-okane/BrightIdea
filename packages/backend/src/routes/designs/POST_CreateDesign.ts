@@ -4,20 +4,12 @@ import {db} from "@src/database/connection";
 import {ulid} from "ulid";
 import type {HonoApp} from "@src/App";
 import {eq} from "drizzle-orm";
-import {validateTurnstileToken} from "@src/routes/designs/utils/ValidateTurnstileToken";
-import {getIp} from "@src/routes/designs/utils/GetIp";
 import {zValidator} from "@hono/zod-validator";
+import {validateTurnstileTokenFromJsonBody} from "@src/middleware/ValidateTurnstileToken";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
-	app.post("/designs", zValidator("json", apiCreateDesignRequestSchema), async context => {
-		const {name, frames, createdBy, turnstileToken} = context.req.valid("json");
-
-		const ip = getIp(context);
-		const turnstileResult = await validateTurnstileToken(turnstileToken, ip);
-
-		if (!turnstileResult.success) {
-			return context.json({message: "CAPTCHA validation failed", errors: turnstileResult.errors}, 403);
-		}
+	app.post("/designs", validateTurnstileTokenFromJsonBody, zValidator("json", apiCreateDesignRequestSchema), async context => {
+		const {name, frames, createdBy} = context.req.valid("json");
 
 		const d1 = db(context.env.Database);
 
