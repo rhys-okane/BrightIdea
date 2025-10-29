@@ -6,10 +6,11 @@ import type {AnimationFrame} from "@shared/types/AnimationFrame";
 interface Props {
 	frame: AnimationFrame;
 	selected: boolean;
+	className?: string;
 }
-export const FramePreview: FC<Props> = ({frame, selected = false}) => {
+export const FramePreview: FC<Props> = ({frame, selected = false, className}) => {
 	return (
-		<div className="flex flex-col items-center justify-center h-full">
+		<div className={`flex flex-col items-center justify-center h-full ${className}`}>
 			<div
 				className={`grid gap-1 border border-white bg-gray-900 w-fit p-3 ${selected ? "border-2" : ""}`}
 				style={{

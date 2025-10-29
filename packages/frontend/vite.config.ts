@@ -13,4 +13,8 @@ export default defineConfig({
 			dgram: path.resolve(import.meta.dirname, "./src/shims/dgram.ts"),
 		},
 	},
+	server: {
+		host: true,
+		allowedHosts: true,
+	},
 });

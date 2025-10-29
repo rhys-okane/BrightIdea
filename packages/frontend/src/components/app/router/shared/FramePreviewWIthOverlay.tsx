@@ -6,11 +6,12 @@ interface Props {
 	frame: AnimationFrame;
 	selected: boolean;
 	children: React.ReactNode;
+	className?: string;
 }
 
-export const FramePreviewWithOverlay: FC<Props> = ({frame, selected, children}) => {
+export const FramePreviewWithOverlay: FC<Props> = ({frame, selected, children, className}) => {
 	return (
-		<div>
+		<div className={className}>
 			<FramePreview frame={frame} selected={selected} />
 			<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
 				{children}

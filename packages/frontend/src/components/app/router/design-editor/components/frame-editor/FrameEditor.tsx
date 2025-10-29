@@ -1,155 +1,138 @@
-import { Cell } from "@src/components/app/router/design-editor/components/frame-editor/cell/Cell";
-import { LED_COLUMN_COUNT } from "@shared/constants/LedGrid";
-import { useCallback, useEffect, useMemo, useRef, type FC } from "react";
-import type {
-  AnimationFrame,
-  Grid,
-  RGBColour,
-} from "@shared/types/AnimationFrame";
-import { ShiftButton } from "@src/components/app/router/design-editor/components/frame-editor/shift-button/ShiftButton";
+import {Cell} from "@src/components/app/router/design-editor/components/frame-editor/cell/Cell";
+import {LED_COLUMN_COUNT} from "@shared/constants/LedGrid";
+import {useCallback, useEffect, useMemo, useRef, type FC} from "react";
+import type {AnimationFrame, Grid, RGBColour} from "@shared/types/AnimationFrame";
+import {VerticalShiftButton} from "@src/components/app/router/design-editor/components/frame-editor/shift-button/VerticalShiftButton";
+import {HorizontalShiftButton} from "@src/components/app/router/design-editor/components/frame-editor/shift-button/HorizontalShiftButton";
 
 interface Props {
-  frame: AnimationFrame;
-  selectedColour: RGBColour;
+	frame: AnimationFrame;
+	selectedColour: RGBColour;
 
-  onFrameChange: (frame: AnimationFrame) => void;
-  onDurationChange: (duration: number) => void;
+	onFrameChange: (frame: AnimationFrame) => void;
+	onDurationChange: (duration: number) => void;
 }
 
-export const FrameEditor: FC<Props> = ({
-  frame,
-  selectedColour,
-  onFrameChange,
-  onDurationChange,
-}) => {
-  const mouseButtonDown = useRef<"left" | "right" | undefined>(undefined);
+export const FrameEditor: FC<Props> = ({frame, selectedColour, onFrameChange, onDurationChange}) => {
+	const mouseButtonDown = useRef<"left" | "right" | undefined>(undefined);
 
-  const onCellClick = useCallback(
-    (
-      mouseButton: "left" | "right",
-      clickedRowIndex: number,
-      clickedColumnIndex: number
-    ) => {
-      // Update the selected frame with the new colour
-      const updatedGrid: Grid = frame.grid.map((row, rIdx) =>
-        row.map((cell, cIdx) => {
-          if (rIdx === clickedRowIndex && cIdx === clickedColumnIndex) {
-            return mouseButton === "left" ? [...selectedColour] : [0, 0, 0];
-          }
+	const onCellClick = useCallback(
+		(mouseButton: "left" | "right", clickedRowIndex: number, clickedColumnIndex: number) => {
+			// Update the selected frame with the new colour
+			const updatedGrid: Grid = frame.grid.map((row, rIdx) =>
+				row.map((cell, cIdx) => {
+					if (rIdx === clickedRowIndex && cIdx === clickedColumnIndex) {
+						return mouseButton === "left" ? [...selectedColour] : [0, 0, 0];
+					}
 
-          return cell;
-        })
-      );
+					return cell;
+				}),
+			);
 
-      const updatedFrame: AnimationFrame = {
-        ...frame,
-        grid: updatedGrid,
-      };
+			const updatedFrame: AnimationFrame = {
+				...frame,
+				grid: updatedGrid,
+			};
 
-      onFrameChange(updatedFrame);
-    },
-    [frame, onFrameChange, selectedColour]
-  );
+			onFrameChange(updatedFrame);
+		},
+		[frame, onFrameChange, selectedColour],
+	);
 
-  useEffect(() => {
-    const onMouseDown = (event: MouseEvent) => {
-      if (event.button === 0) {
-        mouseButtonDown.current = "left";
-      } else if (event.button === 2) {
-        mouseButtonDown.current = "right";
-      }
-    };
+	useEffect(() => {
+		const onMouseDown = (event: MouseEvent) => {
+			if (event.button === 0) {
+				mouseButtonDown.current = "left";
+			} else if (event.button === 2) {
+				mouseButtonDown.current = "right";
+			}
+		};
 
-    const onMouseUp = () => {
-      mouseButtonDown.current = undefined;
-    };
+		const onMouseUp = () => {
+			mouseButtonDown.current = undefined;
+		};
 
-    const onContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
+		const onContextMenu = (e: MouseEvent) => {
+			e.preventDefault();
+		};
 
-    window.addEventListener("contextmenu", onContextMenu);
-    window.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mouseup", onMouseUp);
+		window.addEventListener("contextmenu", onContextMenu);
+		window.addEventListener("mousedown", onMouseDown);
+		window.addEventListener("mouseup", onMouseUp);
 
-    return () => {
-      window.removeEventListener("contextmenu", onContextMenu);
-      window.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, [mouseButtonDown]);
+		return () => {
+			window.removeEventListener("contextmenu", onContextMenu);
+			window.removeEventListener("mousedown", onMouseDown);
+			window.removeEventListener("mouseup", onMouseUp);
+		};
+	}, [mouseButtonDown]);
 
-  const gridCols = useMemo(() => {
-    return {
-      gridTemplateColumns: `repeat(${LED_COLUMN_COUNT}, minmax(0, 1fr))`,
-    };
-  }, []);
+	const gridCols = useMemo(() => {
+		return {
+			gridTemplateColumns: `repeat(${LED_COLUMN_COUNT}, minmax(32px, 1fr))`,
+		};
+	}, []);
 
-  const onMouseEnter = useCallback(
-    (rowIndex: number, colIndex: number) => {
-      if (mouseButtonDown?.current) {
-        onCellClick(mouseButtonDown.current, rowIndex, colIndex);
-      }
-    },
-    [mouseButtonDown, onCellClick]
-  );
+	const onMouseEnter = useCallback(
+		(rowIndex: number, colIndex: number) => {
+			if (mouseButtonDown?.current) {
+				onCellClick(mouseButtonDown.current, rowIndex, colIndex);
+			}
+		},
+		[mouseButtonDown, onCellClick],
+	);
 
-  return (
-    <div className="flex flex-col items-center gap-4 w-full select-none">
-      <h2 className="text-2xl font-bold text-white">Frame Editor</h2>
-      <div className="grid gap-y-2 gap-x-12" style={gridCols}>
-        <ShiftButton
-          direction="Up"
-          frame={frame}
-          onFrameChange={onFrameChange}
-        />
+	return (
+		<div className="flex flex-col items-center gap-4 w-full select-none">
+			<h2 className="text-2xl font-bold text-white">Frame Editor</h2>
+			<div className="flex flex-row gap-2 h-full items-center justify-center">
+				<HorizontalShiftButton direction="Left" frame={frame} onFrameChange={onFrameChange} />
 
-        {frame.grid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => (
-            <Cell
-              key={`${rowIndex}-${colIndex}`}
-              cell={cell}
-              onClick={() => onCellClick("left", rowIndex, colIndex)}
-              onMouseEnter={() => onMouseEnter(rowIndex, colIndex)}
-            />
-          ))
-        )}
+				<div className="grid gap-y-2 gap-x-12 overflow-auto" style={gridCols}>
+					<VerticalShiftButton direction="Up" frame={frame} onFrameChange={onFrameChange} />
 
-        <ShiftButton
-          direction="Down"
-          frame={frame}
-          onFrameChange={onFrameChange}
-        />
-      </div>
+					{frame.grid.map((row, rowIndex) =>
+						row.map((cell, colIndex) => (
+							<Cell
+								key={`${rowIndex}-${colIndex}`}
+								cell={cell}
+								onClick={() => onCellClick("left", rowIndex, colIndex)}
+								onMouseEnter={() => onMouseEnter(rowIndex, colIndex)}
+							/>
+						)),
+					)}
 
-      <div className="flex items-center gap-4 w-full max-w-xs">
-        <label
-          className="text-gray-400 font-medium"
-          htmlFor="frame-duration-slider"
-        >
-          Frame Duration:
-        </label>
-        <input
-          id="frame-duration-slider"
-          type="range"
-          min={10}
-          max={2000}
-          step={10}
-          value={frame.duration}
-          onChange={(e) => onDurationChange(Number(e.target.value))}
-          className="flex-1 accent-blue-500"
-        />
-        <input
-          type="number"
-          min={10}
-          max={2000}
-          step={10}
-          value={frame.duration}
-          onChange={(e) => onDurationChange(Number(e.target.value))}
-          className="w-20 bg-gray-800 text-white rounded px-2 py-1 border border-gray-600"
-        />
-        <span className="text-gray-400 ml-2">ms</span>
-      </div>
-    </div>
-  );
+					<VerticalShiftButton direction="Down" frame={frame} onFrameChange={onFrameChange} />
+				</div>
+
+				<HorizontalShiftButton direction="Right" frame={frame} onFrameChange={onFrameChange} />
+			</div>
+
+			<div className="flex items-center gap-4 w-full max-w-xs">
+				<label className="text-gray-400 font-medium" htmlFor="frame-duration-slider">
+					Frame Duration:
+				</label>
+				<input
+					id="frame-duration-slider"
+					type="range"
+					min={10}
+					max={2000}
+					step={10}
+					value={frame.duration}
+					onChange={e => onDurationChange(Number(e.target.value))}
+					className="flex-1 accent-blue-500"
+				/>
+				<input
+					type="number"
+					min={10}
+					max={2000}
+					step={10}
+					value={frame.duration}
+					onChange={e => onDurationChange(Number(e.target.value))}
+					className="w-20 bg-gray-800 text-white rounded px-2 py-1 border border-gray-600"
+				/>
+				<span className="text-gray-400 ml-2">ms</span>
+			</div>
+		</div>
+	);
 };

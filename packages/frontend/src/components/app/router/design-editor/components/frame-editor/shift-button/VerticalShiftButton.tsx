@@ -7,7 +7,7 @@ interface Props {
 	onFrameChange: (frame: AnimationFrame) => void;
 }
 
-export const ShiftButton: FC<Props> = ({direction, frame, onFrameChange}) => {
+export const VerticalShiftButton: FC<Props> = ({direction, frame, onFrameChange}) => {
 	const handleClick = () => {
 		const shiftedFrame = {
 			...frame,
