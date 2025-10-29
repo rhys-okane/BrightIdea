@@ -15,7 +15,7 @@ export type HonoBindings = {
 const app = new Hono<HonoBindings>().get("/", c => c.json({message: "Hello from Hono!"}));
 export type HonoApp = typeof app;
 
-app.use("*", cors());
+app.use("*", cors({ origin: "*" }));
 app.use("*", async (context, next) => {
 	await next();
 

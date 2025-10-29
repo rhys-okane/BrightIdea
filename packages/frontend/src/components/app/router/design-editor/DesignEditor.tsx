@@ -14,6 +14,7 @@ import {TooltipWrapper} from "@src/components/ui/derived/TooltipWrapper";
 import {useStoreDesignInApi} from "@src/components/app/router/design-editor/hooks/UseStoreDesignInApi";
 import {HelpCircleIcon} from "lucide-react";
 import {Dialog, DialogContent, DialogTrigger} from "@src/components/ui/dialog";
+import {CLOUDFLARE_TURNSTILE_SITE_KEY} from "@src/lib/api/constants/ApiConstants";
 
 interface Props {
 	design: EditableStoreDesign;
@@ -168,11 +169,7 @@ export const DesignEditor: FC<Props> = ({design, setEditingDesign}) => {
 				</div>
 			</div>
 
-			<Turnstile
-				ref={turnstileRef}
-				className="absolute"
-				siteKey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
-			/>
+			<Turnstile ref={turnstileRef} className="absolute" siteKey={CLOUDFLARE_TURNSTILE_SITE_KEY} />
 
 			<Dialog>
 				<DialogTrigger className="h-16 w-16 rounded-md absolute bottom-8 right-8 bg-neutral-950 items-center justify-center flex hover:opacity-80 transition-colors cursor-pointer">
