@@ -27,7 +27,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Deploy to production
-        run: yarn sst deploy
+        run: yarn sst deploy --print-logs
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY }}
