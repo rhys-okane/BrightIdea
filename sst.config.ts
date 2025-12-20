@@ -1,5 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import app from "./packages/backend/src/App";
+
 export default $config({
 	app(input) {
 		return {
@@ -66,61 +68,11 @@ export default $config({
 			resourceGroupName: resourceGroup.name,
 			accountName: storageAccount.name,
 		});
-		const staticWebsite = new azurenative.storage.StorageAccountStaticWebsite("staticwebsite", {
-			accountName: storageAccount.name,
-			resourceGroupName: resourceGroup.name,
-			indexDocument: "index.html",
-			error404Document: "index.html",
-		});
 
-		const buildJob = new command.local.Command("build-frontend", {
-			dir: "../../packages/frontend",
-			create: "yarn install",
-			update: "yarn build",
-		});
-
-		$resolve(buildJob).apply(async () => {
-			const fs = await import("fs/promises");
-
-			const files = await fs.readdir("./packages/frontend/dist", {recursive: true, withFileTypes: true});
-
-			const contentType = (fileName: string) => {
-				const ext = fileName.split(".").pop();
-				switch (ext) {
-					case "html":
-						return "text/html";
-					case "css":
-						return "text/css";
-					case "js":
-						return "application/javascript";
-					case "svg":
-						return "image/svg+xml";
-				}
-			};
-
-			const path = await import("path");
-
-			for (const file of files) {
-				const relativePath = path.relative("./packages/frontend/dist", path.join(file.parentPath, file.name));
-				if (file.isDirectory()) {
-					continue;
-				}
-
-				console.log(relativePath);
-
-				new azurenative.storage.Blob(file.name.replace(/[^a-zA-Z0-9-_]/g, "-"), {
-					resourceGroupName: resourceGroup.name,
-					accountName: storageAccount.name,
-					containerName: staticWebsite.containerName,
-					source: $asset(path.join(file.parentPath, file.name)),
-					contentType: contentType(file.name),
-					blobName: relativePath.replaceAll("\\", "/"),
-				});
-			}
-		});
-
-		new azurenative.web.StaticSite("StaticSite", {
-			resourceGroupName: resourceGroup.name,
+		// Wait for the storage account and resource group to be created before deploying the static site and function app
+		$resolve([storageAccount, resourceGroup] as const).apply(async ([storageAccount, resourceGroup]) => {
+			staticSite(storageAccount, resourceGroup);
+			functionApp(storageAccount, resourceGroup);
 		});
 
 		return {
@@ -129,3 +81,149 @@ export default $config({
 		};
 	},
 });
+
+function staticSite(
+	storageAccount: azurenative.storage.StorageAccount,
+	resourceGroup: azurenative.resources.ResourceGroup,
+): void {
+	const staticWebsite = new azurenative.storage.StorageAccountStaticWebsite("staticwebsite", {
+		accountName: storageAccount.name,
+		resourceGroupName: resourceGroup.name,
+		indexDocument: "index.html",
+		error404Document: "index.html",
+	});
+
+	const buildJob = new command.local.Command("build-frontend", {
+		dir: "../../packages/frontend",
+		create: "yarn install",
+		update: "yarn build",
+	});
+
+	$resolve(buildJob).apply(async () => {
+		const fs = await import("fs/promises");
+
+		const files = await fs.readdir("./packages/frontend/dist", {recursive: true, withFileTypes: true});
+
+		const contentType = (fileName: string) => {
+			const ext = fileName.split(".").pop();
+			switch (ext) {
+				case "html":
+					return "text/html";
+				case "css":
+					return "text/css";
+				case "js":
+					return "application/javascript";
+				case "svg":
+					return "image/svg+xml";
+			}
+		};
+
+		const path = await import("path");
+
+		for (const file of files) {
+			const relativePath = path.relative("./packages/frontend/dist", path.join(file.parentPath, file.name));
+			if (file.isDirectory()) {
+				continue;
+			}
+
+			new azurenative.storage.Blob(file.name.replace(/[^a-zA-Z0-9-_]/g, "-"), {
+				resourceGroupName: resourceGroup.name,
+				accountName: storageAccount.name,
+				containerName: staticWebsite.containerName,
+				source: $asset(path.join(file.parentPath, file.name)),
+				contentType: contentType(file.name),
+				blobName: relativePath.replaceAll("\\", "/"),
+			});
+		}
+	});
+}
+
+function functionApp(
+	storageAccount: azurenative.storage.StorageAccount,
+	resourceGroup: azurenative.resources.ResourceGroup,
+) {
+	const codeContainer = new azurenative.storage.BlobContainer("function-app-code-zips", {
+		resourceGroupName: resourceGroup.name,
+		accountName: storageAccount.name,
+	});
+
+	const codeBlob = new azurenative.storage.Blob("codefunction-app-code", {
+		resourceGroupName: resourceGroup.name,
+		accountName: storageAccount.name,
+		containerName: codeContainer.name,
+		source: $asset("./packages/backend/dist"),
+		blobName: "code.zip",
+	});
+
+	const appServicePlan = new azurenative.web.AppServicePlan("app-service-plan", {
+		resourceGroupName: resourceGroup.name,
+		kind: "FunctionApp",
+		reserved: true,
+		sku: {
+			name: "FC1",
+			tier: "FlexConsumption",
+		},
+	});
+
+	const functionApp = new azurenative.web.WebApp("function-app", {
+		resourceGroupName: resourceGroup.name,
+		location: resourceGroup.location,
+		serverFarmId: appServicePlan.id,
+		httpsOnly: true,
+		kind: "functionapp",
+
+		functionAppConfig: {
+			runtime: {
+				name: "node",
+				version: "22",
+			},
+			deployment: {
+				storage: {
+					type: "BlobContainer",
+					authentication: {
+						type: "StorageAccountConnectionString",
+						storageAccountConnectionStringName: "AzureWebJobsStorage",
+					},
+					value: getConnectionString(resourceGroup.name, storageAccount.name),
+				},
+			},
+			scaleAndConcurrency: {
+				alwaysReady: [],
+				instanceMemoryMB: 512,
+				maximumInstanceCount: 40,
+			},
+		},
+
+		siteConfig: {
+			appSettings: [
+				{
+					name: "AzureWebJobsStorage",
+					value: getConnectionString(resourceGroup.name, storageAccount.name),
+				},
+				{
+					name: "FUNCTIONS_EXTENSION_VERSION",
+					value: "~4",
+				},
+			],
+		},
+	});
+
+	return {
+		hostname: functionApp.defaultHostName,
+	};
+}
+
+export function getConnectionString(
+	resourceGroupName: $util.Input<string>,
+	storageAccountName: $util.Input<string>,
+): $util.Output<string> {
+	// Retrieve the primary storage account key.
+	const storageAccountKeys = azurenative.storage.listStorageAccountKeysOutput({
+		resourceGroupName,
+		accountName: storageAccountName,
+	});
+	const primaryStorageKey = storageAccountKeys.keys[0].value;
+
+	// Build the connection string to the storage account.
+	return $interpolate`DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${primaryStorageKey}`;
+}
