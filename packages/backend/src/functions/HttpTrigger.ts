@@ -1,16 +1,9 @@
-// src/functions/httpTrigger.ts
 import {app} from "@azure/functions";
 import {azureHonoHandler} from "@marplex/hono-azurefunc-adapter";
 import honoApp from "../App";
 
 app.http("httpTrigger", {
-	methods: [
-		//Add all your supported HTTP methods here
-		"GET",
-		"POST",
-		"DELETE",
-		"PUT",
-	],
+	methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
 	authLevel: "anonymous",
 	route: "{*proxy}",
 	handler: azureHonoHandler(honoApp.fetch),

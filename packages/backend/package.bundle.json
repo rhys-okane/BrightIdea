@@ -1,0 +1,8 @@
+{
+	"name": "backend",
+	"type": "commonjs",
+	"main": "index.cjs",
+	"engines": {
+		"node": ">=22"
+	}
+}

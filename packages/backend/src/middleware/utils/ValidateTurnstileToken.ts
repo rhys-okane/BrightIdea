@@ -1,5 +1,3 @@
-import {Resource} from "sst";
-
 interface TurnstileResult {
 	success: boolean;
 	errors: string[];
@@ -12,7 +10,7 @@ export async function validateTurnstileToken(token: string, ip: string | "unknow
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			secret: Resource.TurnstileSecretKey.value,
+			secret: process.env["TURNSTILE_SECRET"],
 			response: token,
 			remoteip: ip,
 		}),

@@ -2,13 +2,26 @@
 	"name": "backend",
 	"type": "module",
 	"packageManager": "yarn@4.9.2",
+	"main": "local-build",
 	"scripts": {
+		"start:local": "func start --typescript",
 		"schema:push": "drizzle-kit push",
 		"migrations:migrate": "drizzle-kit migrate",
-		"migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/"
+		"migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/",
+		"clean": "rm -rf ./dist",
+		"build": "yarn clean && yarn build:makedir && yarn build:copy-files && yarn build:typecheck && yarn build:esbuild && yarn build:zip",
+		"build:makedir": "mkdir -p ./dist",
+		"build:copy-files": "cp ./host.json ./dist/host.json && cp ./package.bundle.json ./dist/package.json",
+		"build:typecheck": "tsc --noEmit",
+		"build:esbuild": "esbuild src/functions/HttpTrigger.ts --bundle --platform=node  --target=es2020 --outfile=dist/index.cjs --external:@azure/functions-core",
+		"build:zip": "cd dist && zip -r function.zip index.cjs package.json host.json",
+		"deploy": "yarn build && yarn deploy:push-to-azure",
+		"deploy:push-to-azure": "RESOURCE_GROUP=$(jq -r '.resourceGroupName' ../../.sst/outputs.json) && FUNCTION_APP=$(jq -r '.functionAppName' ../../.sst/outputs.json) && az functionapp deployment source config-zip -g $RESOURCE_GROUP -n $FUNCTION_APP --src dist/function.zip"
 	},
 	"dependencies": {
 		"@azure/functions": "^4.10.0",
+		"@azure/identity": "^4.13.0",
+		"@azure/keyvault-secrets": "^4.10.0",
 		"@hono/zod-validator": "0.7.3",
 		"@marplex/hono-azurefunc-adapter": "^1.0.1",
 		"drizzle-orm": "0.44.5",
@@ -21,6 +34,7 @@
 	"devDependencies": {
 		"@types/node": "24.6.1",
 		"dotenv": "17.2.3",
-		"drizzle-kit": "0.31.5"
+		"drizzle-kit": "0.31.5",
+		"esbuild": "^0.27.2"
 	}
 }
