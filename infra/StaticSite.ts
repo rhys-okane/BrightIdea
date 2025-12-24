@@ -1,6 +1,8 @@
 export function buildStaticSite(
 	storageAccount: azurenative.storage.StorageAccount,
 	resourceGroup: azurenative.resources.ResourceGroup,
+	// TODO: Replace with a front door
+	functionApp: azurenative.web.WebApp,
 ) {
 	const staticWebsite = new azurenative.storage.StorageAccountStaticWebsite("staticwebsite", {
 		accountName: storageAccount.name,
@@ -9,10 +11,19 @@ export function buildStaticSite(
 		error404Document: "index.html",
 	});
 
+	if (!process.env["CLOUDFLARE_TURNSTILE_SITE_KEY"]) {
+		throw new Error("CLOUDFLARE_TURNSTILE_SITE_KEY environment variable is not set");
+	}
+
 	const buildJob = new command.local.Command("build-frontend", {
 		dir: "../../packages/frontend",
 		create: "yarn install",
 		update: "yarn build",
+		environment: {
+			NODE_ENV: "production",
+			VITE_API_URL: $interpolate`https://${functionApp.hostNames[0]}`,
+			VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: process.env["CLOUDFLARE_TURNSTILE_SITE_KEY"],
+		},
 	});
 
 	$resolve(buildJob).apply(async () => {

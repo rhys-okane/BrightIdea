@@ -1,25 +1,21 @@
-import app from "../packages/backend/src/App";
-
-export async function buildFunctionApp(
-	storageAccount: azurenative.storage.StorageAccount,
-	resourceGroup: azurenative.resources.ResourceGroup,
-	turnstileSecret: azurenative.keyvault.Secret,
-	applicationInsights: azurenative.applicationinsights.Component,
-) {
+interface FunctionAppParameters {
+	storageAccount: azurenative.storage.StorageAccount;
+	resourceGroup: azurenative.resources.ResourceGroup;
+	turnstileSecret: azurenative.keyvault.Secret;
+	applicationInsights: azurenative.applicationinsights.Component;
+	cosmosDbAccount: azurenative.cosmosdb.DatabaseAccount;
+}
+export async function buildFunctionApp({
+	storageAccount,
+	resourceGroup,
+	turnstileSecret,
+	applicationInsights,
+	cosmosDbAccount,
+}: FunctionAppParameters) {
 	const codeContainer = new azurenative.storage.BlobContainer("function-app-code-zips", {
 		resourceGroupName: resourceGroup.name,
 		accountName: storageAccount.name,
 	});
-
-	// const codeBlob = $resolve(buildJob).apply(() => {
-	// 	return new azurenative.storage.Blob("codefunction-app-code", {
-	// 		resourceGroupName: resourceGroup.name,
-	// 		accountName: storageAccount.name,
-	// 		containerName: codeContainer.name,
-	// 		source: $asset("./packages/backend/dist"),
-	// 		blobName: "code.zip",
-	// 	});
-	// });
 
 	const appServicePlan = new azurenative.web.AppServicePlan("app-service-plan", {
 		resourceGroupName: resourceGroup.name,
@@ -75,7 +71,6 @@ export async function buildFunctionApp(
 
 		siteConfig: {
 			appSettings: [
-				// TODO: Can we remove this?
 				{
 					name: "AzureWebJobsStorage",
 					value: getConnectionString(resourceGroup.name, storageAccount.name),
@@ -96,8 +91,82 @@ export async function buildFunctionApp(
 					name: "APPLICATIONINSIGHTS_CONNECTION_STRING",
 					value: applicationInsights.connectionString,
 				},
+				{
+					name: "COSMOS_ENDPOINT",
+					value: cosmosDbAccount.documentEndpoint,
+				},
 			],
+			cors: {
+				allowedOrigins: [
+					storageAccount.primaryEndpoints.web.apply(endpoint => endpoint.replace(/\/$/, "")),
+					"http://localhost",
+				],
+				supportCredentials: true,
+			},
 		},
+	});
+
+	$resolve(functionApp.identity).apply(identity => {
+		if (!identity || !identity.principalId) {
+			throw new Error("Function App identity not found");
+		}
+
+		// From azure
+		const COSMOS_DB_OPERATOR = "230815da-be43-4aae-9cb4-875f7bd000aa";
+
+		const cosmosDbOperator = azurenative.authorization.getRoleDefinitionOutput({
+			roleDefinitionId: COSMOS_DB_OPERATOR,
+			scope: storageAccount.id,
+		});
+
+		new azurenative.authorization.RoleAssignment("functionCosmosDbControlPlaneAccessRole", {
+			principalId: identity.principalId,
+			principalType: "ServicePrincipal",
+			roleDefinitionId: cosmosDbOperator.id,
+			scope: cosmosDbAccount.id,
+		});
+
+		// Manually generated
+		const sqlRoleDefinitionId = "04e8da3a-6e2b-40be-98d8-d46035af5f0e";
+		const sqlRoleDefinition = new azurenative.cosmosdb.SqlResourceSqlRoleDefinition("sqlRoleDefinition", {
+			accountName: cosmosDbAccount.name,
+			resourceGroupName: resourceGroup.name,
+			roleDefinitionId: sqlRoleDefinitionId,
+			roleName: "Azure Cosmos DB for NoSQL Data Plane Owner",
+			type: "CustomRole",
+			assignableScopes: [cosmosDbAccount.id],
+			permissions: [
+				{
+					dataActions: [
+						"Microsoft.DocumentDB/databaseAccounts/readMetadata",
+						"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*",
+						"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*",
+					],
+				},
+			],
+		});
+
+		// Generated manually for stability
+		const cosmosDataAccessAssignmentId = "a55b4ab2-8393-4ebd-b7a3-5bb8d65c952b";
+
+		// Role assignment to allow the function app to access Cosmos DB
+		new azurenative.cosmosdb.SqlResourceSqlRoleAssignment("functionCosmosDbRoleAssignment", {
+			roleAssignmentId: cosmosDataAccessAssignmentId,
+			accountName: cosmosDbAccount.name,
+			resourceGroupName: resourceGroup.name,
+			roleDefinitionId: sqlRoleDefinition.id,
+			principalId: identity.principalId,
+			scope: cosmosDbAccount.id,
+		});
+
+
+
+		new azurenative.authorization.RoleAssignment("functionAppKeyVaultAccess", {
+			principalId: identity.principalId,
+			principalType: "ServicePrincipal",
+			roleDefinitionId: 
+			scope: cosmosDbAccount.id,
+		});
 	});
 
 	const STORAGE_BLOB_DATA_CONTRIBUTOR = "ba92f5b4-2d11-453d-a403-e96b0029c9fe";
@@ -107,10 +176,10 @@ export async function buildFunctionApp(
 		scope: storageAccount.id,
 	});
 
-	// TODO: see if you can remove this and let the managed identity deal with it
 	// Role assignment to allow the function app to read from the storage account
+	// This allows the function to access the code in the blob container
 	new azurenative.authorization.RoleAssignment("functionDeploymentRole", {
-		principalId: userAssignedIdentity.principalId, // user-assigned identity principal
+		principalId: userAssignedIdentity.principalId,
 		principalType: "ServicePrincipal",
 		roleDefinitionId: storageBlobDataContributorRole.id,
 		scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${codeContainer.name}`,

@@ -1,14 +1,17 @@
 import type {D1Database} from "@cloudflare/workers-types";
 import {Hono} from "hono";
 import {cors} from "hono/cors";
+import {listenForCreateDesignPOSTRequest} from "./routes/designs/POST_CreateDesign";
+import {listenForGetDesignsGETRequest} from "./routes/designs/GET_GetAllDesigns";
+import type {InvocationContext} from "@azure/functions";
 
-export type HonoBindings = {
+export interface HonoContext {
 	Bindings: {
-		Database: D1Database;
+		azureContext: InvocationContext;
 	};
-};
+}
 
-const app = new Hono<HonoBindings>().get("/", c => c.json({message: "Hello from Hono!"}));
+const app = new Hono<HonoContext>().get("/", c => c.json({message: "Hello from Hono!"}));
 export type HonoApp = typeof app;
 
 app.use("*", cors());
@@ -16,12 +19,18 @@ app.use("*", async (context, next) => {
 	await next();
 
 	if (context.error) {
-		console.error(JSON.stringify(context.error));
+		context.env.azureContext.error(context.error);
 	}
 });
 
-// listenForGetDesignsGETRequest(app);
-// listenForCreateDesignPOSTRequest(app);
+app.onError((err, context) => {
+	context.env.azureContext.error(err);
+
+	return context.json({message: "Internal Server Error"}, 500);
+});
+
+listenForGetDesignsGETRequest(app);
+listenForCreateDesignPOSTRequest(app);
 // listenForDeleteDesignDELETERequest(app);
 // listenForUpdateDesignPUTRequest(app);
 

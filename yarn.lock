@@ -111,7 +111,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.17.0, @azure/core-rest-pipeline@npm:^1.19.0, @azure/core-rest-pipeline@npm:^1.22.0, @azure/core-rest-pipeline@npm:^1.8.0":
+"@azure/core-rest-pipeline@npm:^1.17.0, @azure/core-rest-pipeline@npm:^1.19.0, @azure/core-rest-pipeline@npm:^1.19.1, @azure/core-rest-pipeline@npm:^1.22.0, @azure/core-rest-pipeline@npm:^1.8.0":
   version: 1.22.2
   resolution: "@azure/core-rest-pipeline@npm:1.22.2"
   dependencies:
@@ -143,6 +143,25 @@ __metadata:
     "@typespec/ts-http-runtime": "npm:^0.3.0"
     tslib: "npm:^2.6.2"
   checksum: 10c0/37067621cdac933c51775c26648fdcea315f07b08bd875cff4610e403eabf9c12532525f0bf094e258dadc03a55d35f12c9242f662526847b32c85cdcc2d6603
+  languageName: node
+  linkType: hard
+
+"@azure/cosmos@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "@azure/cosmos@npm:4.9.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-rest-pipeline": "npm:^1.19.1"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/keyvault-keys": "npm:^4.9.0"
+    "@azure/logger": "npm:^1.1.4"
+    fast-json-stable-stringify: "npm:^2.1.0"
+    priorityqueuejs: "npm:^2.0.0"
+    semaphore: "npm:^1.1.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/68dcc0f5e9648d386ea31e98ae89687d522e2ecb34616119ad5d6a84b9bb03f9b2c3952f997f6d5786ad988f3da969022f042b8e82d0103b8cb2194cdb9c9d90
   languageName: node
   linkType: hard
 
@@ -197,6 +216,26 @@ __metadata:
     "@azure/logger": "npm:^1.1.4"
     tslib: "npm:^2.2.0"
   checksum: 10c0/79499d5e6dde8cd5d6b119d36ef5789aec3f2c4ecfb4ce45f6487c15c23088963ce7bc09e3fa18d44abf31038f0a1779c470e8aa085e03cb0f0c204c7f7faf5c
+  languageName: node
+  linkType: hard
+
+"@azure/keyvault-keys@npm:^4.9.0":
+  version: 4.10.0
+  resolution: "@azure/keyvault-keys@npm:4.10.0"
+  dependencies:
+    "@azure-rest/core-client": "npm:^2.3.3"
+    "@azure/abort-controller": "npm:^2.1.2"
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-http-compat": "npm:^2.2.0"
+    "@azure/core-lro": "npm:^2.7.2"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.19.0"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/keyvault-common": "npm:^2.0.0"
+    "@azure/logger": "npm:^1.1.4"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/cf21a69dfae82b0931e9ad1bd61fd3fde0d765e045e4b482a72aba6440321e7b43cad6b5f35e0fa414bf3a2603069cbc9f355e42ff78518ec5e24e751fbe9e81
   languageName: node
   linkType: hard
 
@@ -1994,13 +2033,6 @@ __metadata:
     "@jridgewell/resolve-uri": "npm:^3.1.0"
     "@jridgewell/sourcemap-codec": "npm:^1.4.14"
   checksum: 10c0/4b30ec8cd56c5fd9a661f088230af01e0c1a3888d11ffb6b47639700f71225be21d1f7e168048d6d4f9449207b978a235c07c8f15c07705685d16dc06280e9d9
-  languageName: node
-  linkType: hard
-
-"@marplex/hono-azurefunc-adapter@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@marplex/hono-azurefunc-adapter@npm:1.0.1"
-  checksum: 10c0/d5c86a2e5e718207465d160afac28f47bde24093b3811aad87ebf9626e589d6300130915358bb76ee5776b26c10ff9cd32d8e1a22b8a130b8197b3cec89cb366
   languageName: node
   linkType: hard
 
@@ -4053,11 +4085,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "backend@workspace:packages/backend"
   dependencies:
+    "@azure/cosmos": "npm:^4.9.0"
     "@azure/functions": "npm:^4.10.0"
     "@azure/identity": "npm:^4.13.0"
     "@azure/keyvault-secrets": "npm:^4.10.0"
     "@hono/zod-validator": "npm:0.7.3"
-    "@marplex/hono-azurefunc-adapter": "npm:^1.0.1"
     "@types/node": "npm:24.6.1"
     dotenv: "npm:17.2.3"
     drizzle-kit: "npm:0.31.5"
@@ -8460,6 +8492,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"priorityqueuejs@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "priorityqueuejs@npm:2.0.0"
+  checksum: 10c0/8e3f6118c5427a3701dd129c859e37a5fb699284dfd4a8cfa3700a1b9685c29db498c00914c844d1c5bfefcf3914fbec1e91327f789dddcd21b34608337323d7
+  languageName: node
+  linkType: hard
+
 "proc-log@npm:^6.0.0":
   version: 6.1.0
   resolution: "proc-log@npm:6.1.0"
@@ -8918,6 +8957,13 @@ __metadata:
   version: 0.26.0
   resolution: "scheduler@npm:0.26.0"
   checksum: 10c0/5b8d5bfddaae3513410eda54f2268e98a376a429931921a81b5c3a2873aab7ca4d775a8caac5498f8cbc7d0daeab947cf923dbd8e215d61671f9f4e392d34356
+  languageName: node
+  linkType: hard
+
+"semaphore@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "semaphore@npm:1.1.0"
+  checksum: 10c0/1eeb146c1ffe1283951573c356ba3a9b18a8513b18959ecbc0e3ba3a99e5da46edc509a9a5f0cb9d5d28895dcd828bdd6c29162c8e41a311ee79efaf3456a723
   languageName: node
   linkType: hard
 

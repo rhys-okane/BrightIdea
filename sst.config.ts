@@ -24,6 +24,7 @@ export default $config({
 		const {buildStaticSite} = await import("./infra/StaticSite");
 		const {buildFunctionApp} = await import("./infra/FunctionApp");
 		const {buildApplicationInsights} = await import("./infra/ApplicationInsights");
+		const {buildCosmosDb} = await import("./infra/CosmosDb");
 
 		const resourceGroup = new azurenative.resources.ResourceGroup("BrightIdeaDevResourceGroup");
 		const storageAccount = new azurenative.storage.StorageAccount("storageaccount", {
@@ -39,14 +40,27 @@ export default $config({
 			accountName: storageAccount.name,
 		});
 
-		// Wait for the storage account and resource group to be created before deploying the static site and function app
-		const functionApp = $resolve([storageAccount, resourceGroup] as const).apply(
+		// Wait for the storage account and resource group to be created before deploying further resources
+		const {functionApp, cosmosDbAccount} = $resolve([storageAccount, resourceGroup] as const).apply(
 			async ([storageAccount, resourceGroup]) => {
-				buildStaticSite(storageAccount, resourceGroup);
 				const {turnstileSecret} = buildKeyVault(resourceGroup);
 				const applicationInsights = buildApplicationInsights(resourceGroup);
+				const {cosmosDbAccount} = buildCosmosDb(resourceGroup, storageAccount);
 
-				return await buildFunctionApp(storageAccount, resourceGroup, turnstileSecret, applicationInsights);
+				const functionApp = await buildFunctionApp({
+					storageAccount,
+					resourceGroup,
+					turnstileSecret,
+					applicationInsights,
+					cosmosDbAccount,
+				});
+
+				buildStaticSite(storageAccount, resourceGroup, functionApp);
+
+				return {
+					functionApp,
+					cosmosDbAccount,
+				};
 			},
 		);
 
@@ -55,6 +69,7 @@ export default $config({
 			websiteUrl: storageAccount.primaryEndpoints.web,
 			resourceGroupName: resourceGroup.name,
 			functionAppName: functionApp.name,
+			cosmosDbEndpoint: cosmosDbAccount.documentEndpoint,
 		};
 	},
 });

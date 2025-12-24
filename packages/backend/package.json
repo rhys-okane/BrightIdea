@@ -19,11 +19,11 @@
 		"deploy:push-to-azure": "RESOURCE_GROUP=$(jq -r '.resourceGroupName' ../../.sst/outputs.json) && FUNCTION_APP=$(jq -r '.functionAppName' ../../.sst/outputs.json) && az functionapp deployment source config-zip -g $RESOURCE_GROUP -n $FUNCTION_APP --src dist/function.zip"
 	},
 	"dependencies": {
+		"@azure/cosmos": "^4.9.0",
 		"@azure/functions": "^4.10.0",
 		"@azure/identity": "^4.13.0",
 		"@azure/keyvault-secrets": "^4.10.0",
 		"@hono/zod-validator": "0.7.3",
-		"@marplex/hono-azurefunc-adapter": "^1.0.1",
 		"drizzle-orm": "0.44.5",
 		"hono": "4.9.9",
 		"jose": "6.1.0",

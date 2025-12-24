@@ -1,6 +1,16 @@
-import type {D1Database} from "@cloudflare/workers-types";
-import {drizzle} from "drizzle-orm/d1";
-import {env} from "hono/adapter";
-import {Resource} from "sst";
+import {DefaultAzureCredential} from "@azure/identity";
+import {CosmosClient} from "@azure/cosmos";
 
-export const db = (binding: D1Database) => drizzle(binding);
+const credential = new DefaultAzureCredential();
+
+if (!process.env["COSMOS_ENDPOINT"]) {
+	throw new Error("COSMOS_ENDPOINT environment variable is not set");
+}
+
+export const cosmosDbClient = new CosmosClient({
+	endpoint: process.env["COSMOS_ENDPOINT"],
+	aadCredentials: credential,
+});
+
+export const database = cosmosDbClient.database("cosmosdb-database");
+export const designsContainer = database.container("designs-container");
