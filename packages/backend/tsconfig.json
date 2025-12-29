@@ -41,7 +41,8 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false, // Toggle by CLI flag instead
+    "outDir": "./local-build",
 
     "baseUrl": ".",
     "paths": {

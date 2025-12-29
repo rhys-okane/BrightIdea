@@ -4,6 +4,9 @@ interface FunctionAppParameters {
 	turnstileSecret: azurenative.keyvault.Secret;
 	applicationInsights: azurenative.applicationinsights.Component;
 	cosmosDbAccount: azurenative.cosmosdb.DatabaseAccount;
+	keyVault: azurenative.keyvault.Vault;
+	emailService: azurenative.communication.EmailService;
+	emailDomain: azurenative.communication.Domain;
 }
 export async function buildFunctionApp({
 	storageAccount,
@@ -11,6 +14,9 @@ export async function buildFunctionApp({
 	turnstileSecret,
 	applicationInsights,
 	cosmosDbAccount,
+	keyVault,
+	emailService,
+	emailDomain,
 }: FunctionAppParameters) {
 	const codeContainer = new azurenative.storage.BlobContainer("function-app-code-zips", {
 		resourceGroupName: resourceGroup.name,
@@ -85,7 +91,7 @@ export async function buildFunctionApp({
 				},
 				{
 					name: "TURNSTILE_SECRET",
-					value: `@Microsoft.KeyVault(SecretUri=${turnstileSecret.properties.secretUriWithVersion})`,
+					value: $interpolate`@Microsoft.KeyVault(SecretUri=${turnstileSecret.properties.secretUriWithVersion})`,
 				},
 				{
 					name: "APPLICATIONINSIGHTS_CONNECTION_STRING",
@@ -94,6 +100,14 @@ export async function buildFunctionApp({
 				{
 					name: "COSMOS_ENDPOINT",
 					value: cosmosDbAccount.documentEndpoint,
+				},
+				{
+					name: "EMAIL_SENDER_DOMAIN",
+					value: emailDomain.fromSenderDomain,
+				},
+				{
+					name: "EMAIL_SERVICE_ENDPOINT",
+					value: $interpolate`https://${emailService.name}.communication.azure.com`,
 				},
 			],
 			cors: {
@@ -111,7 +125,7 @@ export async function buildFunctionApp({
 			throw new Error("Function App identity not found");
 		}
 
-		// From azure
+		// Grant access to Cosmos Control Plane
 		const COSMOS_DB_OPERATOR = "230815da-be43-4aae-9cb4-875f7bd000aa";
 
 		const cosmosDbOperator = azurenative.authorization.getRoleDefinitionOutput({
@@ -125,6 +139,8 @@ export async function buildFunctionApp({
 			roleDefinitionId: cosmosDbOperator.id,
 			scope: cosmosDbAccount.id,
 		});
+
+		// Grant access to Cosmos Data Plane
 
 		// Manually generated
 		const sqlRoleDefinitionId = "04e8da3a-6e2b-40be-98d8-d46035af5f0e";
@@ -159,13 +175,52 @@ export async function buildFunctionApp({
 			scope: cosmosDbAccount.id,
 		});
 
+		// Grant access to Key Vault secrets
+		const KEY_VAULT_SECRETS_USER = "4633458b-17de-408a-b874-0445c86b69e6"; // Key Vault Secrets User
 
+		const keyVaultSecretsUserRole = azurenative.authorization.getRoleDefinitionOutput({
+			roleDefinitionId: KEY_VAULT_SECRETS_USER,
+			scope: storageAccount.id,
+		});
 
 		new azurenative.authorization.RoleAssignment("functionAppKeyVaultAccess", {
 			principalId: identity.principalId,
 			principalType: "ServicePrincipal",
-			roleDefinitionId: 
-			scope: cosmosDbAccount.id,
+			roleDefinitionId: keyVaultSecretsUserRole.id,
+			scope: keyVault.id,
+		});
+
+		// Grant access to send emails via Communication Services
+		const communicationServicesEmailSenderRole = new azurenative.authorization.RoleDefinition(
+			"functionAppEmailSenderRole",
+			{
+				roleName: "Communication Services Email Sender",
+				permissions: [
+					{
+						actions: [
+							"Microsoft.Communication/CommunicationServices/Read",
+							"Microsoft.Communication/CommunicationServices/Write",
+						],
+					},
+				],
+				assignableScopes: [emailService.id],
+				scope: emailService.id,
+			},
+		);
+
+		new azurenative.authorization.RoleAssignment("functionAppCommunicationServicesEmailSenderRole", {
+			principalId: identity.principalId,
+			principalType: "ServicePrincipal",
+			roleDefinitionId: communicationServicesEmailSenderRole.id,
+			scope: emailService.id,
+		});
+
+		// For local dev
+		new azurenative.authorization.RoleAssignment("localDevCommunicationServicesEmailSenderRole", {
+			principalId: azurenative.authorization.getClientConfigOutput().apply(config => config.objectId),
+			principalType: "User",
+			roleDefinitionId: communicationServicesEmailSenderRole.id,
+			scope: emailService.id,
 		});
 	});
 

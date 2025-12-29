@@ -11,6 +11,8 @@ import {zValidator} from "@hono/zod-validator";
 import {validateTurnstileTokenFromJsonBody} from "@src/middleware/ValidateTurnstileToken";
 import {getDesignByNameQuery} from "@src/database/queries/GetDesignByName";
 import type {DesignDataModel} from "@src/database/types/Design";
+import {createDesignQuery} from "@src/database/queries/CreateDesign";
+import {sendDesignCreateNotificationEmail} from "@src/email/emails/SendDesignCreateNotificationEmail";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 	app.post(
@@ -26,32 +28,26 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 				return context.json({message: "A design with that name already exists."}, 409);
 			}
 
-			// const newDesign: APICreateDesignResponse = await d1
-			// 	.insert(designsTable)
-			// 	.values({
-			// 		name,
-			// 		createdBy: createdBy,
-			// 		frames,
-			// 		editToken: ulid(),
-			// 	})
-			// 	.returning()
-			// 	.get();
-
 			const newDesign: DesignDataModel = {
-				designId: ulid(),
+				id: ulid(),
 				name,
 				frames,
+				editToken: ulid(),
 				createdBy: createdBy,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			};
 
+			await createDesignQuery(newDesign);
+			await sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch(error => {
+				context.env.azureContext.warn("Failed to send design creation notification email", error);
+			});
+
 			return context.json<APICreateDesignResponse>(
 				{
-					id: newDesign.designId,
+					id: newDesign.id,
 					name: newDesign.name,
-					// TODO: Remove me/replace with actual login system
-					editToken: ulid(),
+					editToken: newDesign.editToken,
 					frames: newDesign.frames,
 					createdBy: newDesign.createdBy,
 					createdAt: newDesign.createdAt,

@@ -4,6 +4,8 @@ import {cors} from "hono/cors";
 import {listenForCreateDesignPOSTRequest} from "./routes/designs/POST_CreateDesign";
 import {listenForGetDesignsGETRequest} from "./routes/designs/GET_GetAllDesigns";
 import type {InvocationContext} from "@azure/functions";
+import {listenForUpdateDesignPUTRequest} from "./routes/designs/:id/PUT_UpdateDesign";
+import {listenForDeleteDesignDELETERequest} from "./routes/designs/:id/DELETE_DeleteDesign";
 
 export interface HonoContext {
 	Bindings: {
@@ -31,7 +33,7 @@ app.onError((err, context) => {
 
 listenForGetDesignsGETRequest(app);
 listenForCreateDesignPOSTRequest(app);
-// listenForDeleteDesignDELETERequest(app);
-// listenForUpdateDesignPUTRequest(app);
+listenForDeleteDesignDELETERequest(app);
+listenForUpdateDesignPUTRequest(app);
 
 export default app;

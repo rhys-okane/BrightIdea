@@ -38,7 +38,7 @@ export const buildCosmosDb = (
 		resource: {
 			id: "designs-container",
 			partitionKey: {
-				paths: ["/designId"],
+				paths: ["/id"],
 				kind: "Hash",
 			},
 			indexingPolicy: {

@@ -25,6 +25,7 @@ export default $config({
 		const {buildFunctionApp} = await import("./infra/FunctionApp");
 		const {buildApplicationInsights} = await import("./infra/ApplicationInsights");
 		const {buildCosmosDb} = await import("./infra/CosmosDb");
+		const {buildEmailService} = await import("./infra/EmailService");
 
 		const resourceGroup = new azurenative.resources.ResourceGroup("BrightIdeaDevResourceGroup");
 		const storageAccount = new azurenative.storage.StorageAccount("storageaccount", {
@@ -41,11 +42,12 @@ export default $config({
 		});
 
 		// Wait for the storage account and resource group to be created before deploying further resources
-		const {functionApp, cosmosDbAccount} = $resolve([storageAccount, resourceGroup] as const).apply(
+		const {functionApp, cosmosDbAccount, emailDomain} = $resolve([storageAccount, resourceGroup] as const).apply(
 			async ([storageAccount, resourceGroup]) => {
-				const {turnstileSecret} = buildKeyVault(resourceGroup);
+				const {keyVault, turnstileSecret} = buildKeyVault(resourceGroup);
 				const applicationInsights = buildApplicationInsights(resourceGroup);
 				const {cosmosDbAccount} = buildCosmosDb(resourceGroup, storageAccount);
+				const {emailService, emailDomain} = buildEmailService(resourceGroup);
 
 				const functionApp = await buildFunctionApp({
 					storageAccount,
@@ -53,6 +55,9 @@ export default $config({
 					turnstileSecret,
 					applicationInsights,
 					cosmosDbAccount,
+					keyVault,
+					emailService,
+					emailDomain,
 				});
 
 				buildStaticSite(storageAccount, resourceGroup, functionApp);
@@ -60,6 +65,7 @@ export default $config({
 				return {
 					functionApp,
 					cosmosDbAccount,
+					emailDomain,
 				};
 			},
 		);
@@ -70,6 +76,7 @@ export default $config({
 			resourceGroupName: resourceGroup.name,
 			functionAppName: functionApp.name,
 			cosmosDbEndpoint: cosmosDbAccount.documentEndpoint,
+			emailDomain: emailDomain.fromSenderDomain,
 		};
 	},
 });

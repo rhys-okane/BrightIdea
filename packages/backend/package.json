@@ -1,8 +1,8 @@
 {
 	"name": "backend",
-	"type": "module",
+	"type": "commonjs",
 	"packageManager": "yarn@4.9.2",
-	"main": "local-build",
+	"main": "./dist/index.cjs",
 	"scripts": {
 		"start:local": "func start --typescript",
 		"schema:push": "drizzle-kit push",
@@ -15,10 +15,12 @@
 		"build:typecheck": "tsc --noEmit",
 		"build:esbuild": "esbuild src/functions/HttpTrigger.ts --bundle --platform=node  --target=es2020 --outfile=dist/index.cjs --external:@azure/functions-core",
 		"build:zip": "cd dist && zip -r function.zip index.cjs package.json host.json",
-		"deploy": "yarn build && yarn deploy:push-to-azure",
+		"local-build": "yarn build:esbuild --watch --sourcemap",
+		"deploy": "yarn deploy:push-to-azure",
 		"deploy:push-to-azure": "RESOURCE_GROUP=$(jq -r '.resourceGroupName' ../../.sst/outputs.json) && FUNCTION_APP=$(jq -r '.functionAppName' ../../.sst/outputs.json) && az functionapp deployment source config-zip -g $RESOURCE_GROUP -n $FUNCTION_APP --src dist/function.zip"
 	},
 	"dependencies": {
+		"@azure/communication-email": "^1.1.0",
 		"@azure/cosmos": "^4.9.0",
 		"@azure/functions": "^4.10.0",
 		"@azure/identity": "^4.13.0",
