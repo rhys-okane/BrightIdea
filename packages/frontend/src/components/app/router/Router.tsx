@@ -3,12 +3,15 @@ import {DesignEditor} from "@src/components/app/router/design-editor/DesignEdito
 import {DesignPicker} from "@src/components/app/router/design-picker/DesignPicker";
 import {useDesignPlayer} from "@src/components/app/router/hooks/UseDesignPlayer";
 import {useEditingDesignState} from "@src/store/hooks/UseEditingDesignState";
+import {useGalleryViewState} from "@src/store/hooks/UseGalleryViewState";
 import {usePlayingDesignState} from "@src/store/hooks/UsePlayingDesignState";
 import type {FC} from "react";
+import {GalleryView} from "./gallery-view/GalleryView";
 
 export const Router: FC = () => {
 	const [editingDesign, setEditingDesign] = useEditingDesignState();
 	const [playingDesignId] = usePlayingDesignState();
+	const [showingGallery] = useGalleryViewState();
 
 	useDesignPlayer();
 
@@ -18,6 +21,10 @@ export const Router: FC = () => {
 
 	if (playingDesignId === "audio") {
 		return <AudioMode />;
+	}
+
+	if (showingGallery) {
+		return <GalleryView />;
 	}
 
 	return <DesignPicker />;

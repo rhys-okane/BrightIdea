@@ -13,6 +13,7 @@ export interface MyStoreDesign extends BaseStoreDesign {
 	isNew: false;
 	editToken: string;
 	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface NewStoreDesign extends BaseStoreDesign {
@@ -25,5 +26,7 @@ export interface SomeoneElsesStoreDesign extends BaseStoreDesign {
 	id: string;
 	isMine: false;
 	editToken?: undefined;
+	createdAt: Date;
+	updatedAt: Date;
 }
 export type PlayableDesign = MyStoreDesign | SomeoneElsesStoreDesign;

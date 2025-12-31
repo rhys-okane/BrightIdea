@@ -1,8 +1,14 @@
 import {apiGetDesignsResponseSchema, type APIGetDesignsResponse} from "@shared/models/api/APIGetDesignsRequest";
 import {API_URL} from "@src/lib/api/constants/ApiConstants";
 
-export const apiFetchDesigns = async (pageNumber: number): Promise<APIGetDesignsResponse> => {
-	const response = await fetch(`${API_URL}/designs?page=${pageNumber}&pageSize=100`, {
+export const apiFetchDesigns = async (pageSize: number, lastSeen: Date | null): Promise<APIGetDesignsResponse> => {
+	const query = new URLSearchParams();
+	query.append("pageSize", pageSize.toString());
+	if (lastSeen) {
+		query.append("lastSeen", lastSeen.toISOString());
+	}
+
+	const response = await fetch(`${API_URL}/designs?${query.toString()}`, {
 		method: "GET",
 	});
 

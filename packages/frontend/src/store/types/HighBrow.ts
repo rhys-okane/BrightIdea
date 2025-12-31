@@ -18,6 +18,9 @@ export interface HighBrow {
 				isMine: boolean;
 		  }
 		| undefined;
+	// TODO: Really should just be react router at this point but that's a lot of conversion work
+	isInGalleryView: boolean;
+	hasNextPage: boolean;
 }
 
 export type CreateReducers<T> = {

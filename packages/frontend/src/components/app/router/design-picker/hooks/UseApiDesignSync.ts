@@ -10,10 +10,10 @@ export const useApiDesignSync = () => {
 	const hasFetched = useRef(false);
 	const [, setIsLoadingDesigns] = useIsLoadingDesignsState();
 	const setOthersDesigns = useHighBrowStore(state => state.setOthersDesigns);
+	const setHasNextPage = useHighBrowStore(state => state.setHasNextPage);
 	const [myDesigns] = useMyDesignsState();
 
 	if (!hasFetched.current) {
-		console.log("page rerendered");
 		if (!window.navigator.onLine) {
 			return void toast.info("You are offline, but you can still play any pre-existing designs.");
 		}
@@ -21,10 +21,9 @@ export const useApiDesignSync = () => {
 
 		(async () => {
 			try {
-				const designs = await apiFetchDesigns(1);
+				const {designs, hasNextPage} = await apiFetchDesigns(100, null);
+				setHasNextPage(hasNextPage);
 				setOthersDesigns(extractOthersDesignsFromAPI(myDesigns, designs));
-
-				toast.success("Designs downloaded");
 			} catch (error) {
 				console.error("Failed to fetch designs:", error);
 				toast.error("Failed to fetch designs");

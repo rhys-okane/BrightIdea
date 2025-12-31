@@ -66,7 +66,7 @@ export const InputWithTypingPlaceholder: FC<Props> = ({defaultPlaceholder, place
 		return () => {
 			active = false;
 		};
-	}, []);
+	}, [placeholders]);
 
 	return (
 		<div className="relative inline-block">

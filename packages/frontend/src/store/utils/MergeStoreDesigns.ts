@@ -3,7 +3,7 @@ import {type MyStoreDesign, type SomeoneElsesStoreDesign} from "@src/store/types
 
 export function extractOthersDesignsFromAPI(
 	myDesigns: MyStoreDesign[],
-	apiDesigns: APIGetDesignsResponse,
+	apiDesigns: APIGetDesignsResponse["designs"],
 ): SomeoneElsesStoreDesign[] {
 	const myDesignsMap: Map<string, MyStoreDesign> = new Map(myDesigns.map(design => [design.id, design]));
 

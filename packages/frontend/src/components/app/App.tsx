@@ -1,7 +1,7 @@
 import {type FC} from "react";
 import "../../Main.css";
-import {Router} from "@src/components/app/router/Router";
 import {ToastContainer} from "react-toastify";
+import {Router} from "./router/Router";
 
 export const App: FC = () => {
 	return (
