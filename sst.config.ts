@@ -26,6 +26,8 @@ export default $config({
 		const {buildApplicationInsights} = await import("./infra/ApplicationInsights");
 		const {buildCosmosDb} = await import("./infra/CosmosDb");
 		const {buildEmailService} = await import("./infra/EmailService");
+		const {buildMediaBlobContainer} = await import("./infra/MediaBlobContainer");
+		const {buildAiSearch} = await import("./infra/AISearch");
 
 		const resourceGroup = new azurenative.resources.ResourceGroup("BrightIdeaDevResourceGroup");
 		const storageAccount = new azurenative.storage.StorageAccount("storageaccount", {
@@ -48,6 +50,8 @@ export default $config({
 				const applicationInsights = buildApplicationInsights(resourceGroup);
 				const {cosmosDbAccount} = buildCosmosDb(resourceGroup, storageAccount);
 				const {emailService, emailDomain} = buildEmailService(resourceGroup);
+				const mediaBlobContainer = buildMediaBlobContainer(resourceGroup, storageAccount);
+				const {aiSearchService} = await buildAiSearch(resourceGroup);
 
 				const functionApp = await buildFunctionApp({
 					storageAccount,
@@ -58,6 +62,8 @@ export default $config({
 					keyVault,
 					emailService,
 					emailDomain,
+					mediaBlobContainer,
+					aiSearchService,
 				});
 
 				buildStaticSite(storageAccount, resourceGroup, functionApp);

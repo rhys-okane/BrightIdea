@@ -7,6 +7,8 @@ interface FunctionAppParameters {
 	keyVault: azurenative.keyvault.Vault;
 	emailService: azurenative.communication.EmailService;
 	emailDomain: azurenative.communication.Domain;
+	mediaBlobContainer: azurenative.storage.BlobContainer;
+	aiSearchService: azurenative.search.Service;
 }
 export async function buildFunctionApp({
 	storageAccount,
@@ -17,6 +19,8 @@ export async function buildFunctionApp({
 	keyVault,
 	emailService,
 	emailDomain,
+	mediaBlobContainer,
+	aiSearchService,
 }: FunctionAppParameters) {
 	const codeContainer = new azurenative.storage.BlobContainer("function-app-code-zips", {
 		resourceGroupName: resourceGroup.name,
@@ -120,6 +124,13 @@ export async function buildFunctionApp({
 		},
 	});
 
+	const STORAGE_BLOB_DATA_CONTRIBUTOR = "ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+
+	const storageBlobDataContributorRole = azurenative.authorization.getRoleDefinitionOutput({
+		roleDefinitionId: STORAGE_BLOB_DATA_CONTRIBUTOR,
+		scope: storageAccount.id,
+	});
+
 	$resolve(functionApp.identity).apply(identity => {
 		if (!identity || !identity.principalId) {
 			throw new Error("Function App identity not found");
@@ -215,20 +226,28 @@ export async function buildFunctionApp({
 			scope: emailService.id,
 		});
 
-		// For local dev
-		new azurenative.authorization.RoleAssignment("localDevCommunicationServicesEmailSenderRole", {
-			principalId: azurenative.authorization.getClientConfigOutput().apply(config => config.objectId),
-			principalType: "User",
-			roleDefinitionId: communicationServicesEmailSenderRole.id,
-			scope: emailService.id,
+		// Access to the media blob container
+		new azurenative.authorization.RoleAssignment("mediaBlobContainerAccess", {
+			principalId: userAssignedIdentity.principalId,
+			principalType: "ServicePrincipal",
+			roleDefinitionId: storageBlobDataContributorRole.id,
+			scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${mediaBlobContainer.name}`,
 		});
-	});
 
-	const STORAGE_BLOB_DATA_CONTRIBUTOR = "ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+		// AI Search index access
+		const SEARCH_INDEX_DATA_CONTRIBUTOR = "8ebe5a00-799e-43f5-93ac-243d3dce84a7";
 
-	const storageBlobDataContributorRole = azurenative.authorization.getRoleDefinitionOutput({
-		roleDefinitionId: STORAGE_BLOB_DATA_CONTRIBUTOR,
-		scope: storageAccount.id,
+		const searchIndexDataContributorRole = azurenative.authorization.getRoleDefinitionOutput({
+			roleDefinitionId: SEARCH_INDEX_DATA_CONTRIBUTOR,
+			scope: aiSearchService.id,
+		});
+
+		new azurenative.authorization.RoleAssignment("aiSearchServiceAccess", {
+			principalId: identity.principalId,
+			principalType: "ServicePrincipal",
+			roleDefinitionId: searchIndexDataContributorRole.id,
+			scope: aiSearchService.id,
+		});
 	});
 
 	// Role assignment to allow the function app to read from the storage account
