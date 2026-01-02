@@ -67,6 +67,7 @@
     "ts-jest": "29.4.0",
     "tw-merge": "0.0.1-alpha.3",
     "ulid": "3.0.1",
+    "use-debounce": "^10.0.6",
     "vaul": "^1.1.2",
     "wled-js": "0.0.2",
     "zod": "^4.2.1",

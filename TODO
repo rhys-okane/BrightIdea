@@ -1,6 +1,7 @@
 - [ ] CI/CD
 - [ ] Email
-- [ ] AI Search
+- [x] AI Search
+- [ ] Design grid skeleton
 - [ ] Admin login
 - [ ] Video upload
 - [ ] extra logging

@@ -1,3 +1,4 @@
+import {searchClient} from "@src/search/AISearch";
 import {designsContainer} from "../connection";
 import type {DesignDataModel} from "../types/Design";
 

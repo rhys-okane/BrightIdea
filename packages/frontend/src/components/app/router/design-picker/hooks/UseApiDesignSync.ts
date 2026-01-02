@@ -10,7 +10,6 @@ export const useApiDesignSync = () => {
 	const hasFetched = useRef(false);
 	const [, setIsLoadingDesigns] = useIsLoadingDesignsState();
 	const setOthersDesigns = useHighBrowStore(state => state.setOthersDesigns);
-	const setHasNextPage = useHighBrowStore(state => state.setHasNextPage);
 	const [myDesigns] = useMyDesignsState();
 
 	if (!hasFetched.current) {
@@ -21,8 +20,7 @@ export const useApiDesignSync = () => {
 
 		(async () => {
 			try {
-				const {designs, hasNextPage} = await apiFetchDesigns(100, null);
-				setHasNextPage(hasNextPage);
+				const {designs} = await apiFetchDesigns(100, null);
 				setOthersDesigns(extractOthersDesignsFromAPI(myDesigns, designs));
 			} catch (error) {
 				console.error("Failed to fetch designs:", error);

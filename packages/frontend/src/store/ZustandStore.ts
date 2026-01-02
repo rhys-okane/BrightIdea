@@ -11,7 +11,6 @@ const initialState: HighBrow = {
 	editingDesign: undefined,
 	playingDesign: undefined,
 	isInGalleryView: false,
-	hasNextPage: false,
 };
 
 export const useHighBrowStore = create(
@@ -72,11 +71,6 @@ export const useHighBrowStore = create(
 					setIsInGalleryView: (payload: HighBrow["isInGalleryView"]) => {
 						set({
 							isInGalleryView: payload,
-						});
-					},
-					setHasNextPage: (payload: HighBrow["hasNextPage"]) => {
-						set({
-							hasNextPage: payload,
 						});
 					},
 				}),

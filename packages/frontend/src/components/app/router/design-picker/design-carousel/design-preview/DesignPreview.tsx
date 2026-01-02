@@ -24,7 +24,7 @@ export const DesignPreview: FC<Props> = ({design, turnstileRef, variant = "desig
 	});
 
 	return (
-		<div style={{width: "fit-content"}}>
+		<div className="w-fit flex flex-col gap-2">
 			<div className="relative inline-block group">
 				<FramePreviewWithOverlay frame={currentFrame} selected={false}>
 					{design.isMine ? (
@@ -37,12 +37,18 @@ export const DesignPreview: FC<Props> = ({design, turnstileRef, variant = "desig
 
 			{variant === "full" && (
 				<div className="items-center flex flex-col">
-					<span className={"font-space-mono text-xl text-white"}>{design.name}</span>
+					<span
+						className={
+							"font-space-mono text-xl text-white truncate max-w-[180px] text-center text-wrap break-words"
+						}
+					>
+						{design.name}
+					</span>
 					<hr className="border-t border-gray-400 w-[50%]" />
 
 					<div className="flex flex-row text-xl gap-1">
 						<p className="text-gray-400">By </p>
-						<span className="text-white">{design.createdBy}</span>
+						<span className="text-white truncate max-w-[180px]">{design.createdBy}</span>
 					</div>
 				</div>
 			)}

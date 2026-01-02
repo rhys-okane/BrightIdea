@@ -10,7 +10,7 @@ interface Props {
 
 export const DesignGrid: FC<Props> = ({designs, turnstileRef}) => {
 	return (
-		<div className="grid grid-cols-7 gap-4">
+		<div className="flex flex-row flex-wrap grow-0 gap-4 max-w-[1400px] px-4 2xl:px-0 justify-center">
 			{designs.map(design => (
 				<DesignPreview design={design} key={design.id} turnstileRef={turnstileRef} variant="full" />
 			))}

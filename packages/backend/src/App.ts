@@ -1,4 +1,3 @@
-import type {D1Database} from "@cloudflare/workers-types";
 import {Hono} from "hono";
 import {cors} from "hono/cors";
 import {listenForCreateDesignPOSTRequest} from "./routes/designs/POST_CreateDesign";
@@ -6,6 +5,7 @@ import {listenForGetDesignsGETRequest} from "./routes/designs/GET_GetAllDesigns"
 import type {InvocationContext} from "@azure/functions";
 import {listenForUpdateDesignPUTRequest} from "./routes/designs/:id/PUT_UpdateDesign";
 import {listenForDeleteDesignDELETERequest} from "./routes/designs/:id/DELETE_DeleteDesign";
+import {listenForGetSearchDesignsGETRequest} from "./routes/designs/GET_SearchDesigns";
 
 export interface HonoContext {
 	Bindings: {
@@ -32,6 +32,7 @@ app.onError((err, context) => {
 });
 
 listenForGetDesignsGETRequest(app);
+listenForGetSearchDesignsGETRequest(app);
 listenForCreateDesignPOSTRequest(app);
 listenForDeleteDesignDELETERequest(app);
 listenForUpdateDesignPUTRequest(app);

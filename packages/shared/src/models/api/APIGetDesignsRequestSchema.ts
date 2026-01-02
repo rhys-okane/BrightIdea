@@ -1,10 +1,6 @@
 import z from "zod";
 import {stringToDate} from "./utils/StringToDateCodec";
-
-const stringToNumber = z.codec(z.string().regex(z.regexes.number), z.number(), {
-	decode: str => Number.parseFloat(str),
-	encode: num => num.toString(),
-});
+import {stringToNumber} from "./utils/StringToNumberCodec";
 
 export const apiGetDesignsRequestSchema = z.object({
 	lastSeen: stringToDate.optional(),

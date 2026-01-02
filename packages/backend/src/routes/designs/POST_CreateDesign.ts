@@ -13,6 +13,7 @@ import {getDesignByNameQuery} from "@src/database/queries/GetDesignByName";
 import type {DesignDataModel} from "@src/database/types/Design";
 import {createDesignQuery} from "@src/database/queries/CreateDesign";
 import {sendDesignCreateNotificationEmail} from "@src/email/emails/SendDesignCreateNotificationEmail";
+import {aiSearchIndexDesign} from "@src/search/actions/IndexDesign";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 	app.post(
@@ -39,6 +40,7 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 			};
 
 			await createDesignQuery(newDesign);
+			await aiSearchIndexDesign(newDesign);
 			await sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch(error => {
 				context.env.azureContext.warn("Failed to send design creation notification email", error);
 			});

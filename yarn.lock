@@ -113,7 +113,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-http-compat@npm:^2.2.0":
+"@azure/core-http-compat@npm:^2.1.2, @azure/core-http-compat@npm:^2.2.0":
   version: 2.3.1
   resolution: "@azure/core-http-compat@npm:2.3.1"
   dependencies:
@@ -327,6 +327,24 @@ __metadata:
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
   checksum: 10c0/8f61c2172c31cae156c42ada15bd7795ce7ef2b12c33e2c2e4e5802678596c53985f560cb40a93647064f1866d643f75c62699130121aa368ef9b69b87e5f071
+  languageName: node
+  linkType: hard
+
+"@azure/search-documents@npm:^12.2.0":
+  version: 12.2.0
+  resolution: "@azure/search-documents@npm:12.2.0"
+  dependencies:
+    "@azure/core-auth": "npm:^1.9.0"
+    "@azure/core-client": "npm:^1.9.2"
+    "@azure/core-http-compat": "npm:^2.1.2"
+    "@azure/core-paging": "npm:^1.6.2"
+    "@azure/core-rest-pipeline": "npm:^1.18.0"
+    "@azure/core-tracing": "npm:^1.2.0"
+    "@azure/core-util": "npm:^1.11.0"
+    "@azure/logger": "npm:^1.1.4"
+    events: "npm:^3.0.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/b2aa5ac9a2379a767afb70f79cb833874ba16311662280ccecd7b5165c56aa395d6d6565d0b986cc2cabfcff90322fb346ceb3f5a5ae87aeca7fe89c48dc18ab
   languageName: node
   linkType: hard
 
@@ -805,13 +823,6 @@ __metadata:
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3"
   checksum: 10c0/6b80ae4cb3db53f486da2dc63b6e190a74c8c3cca16bb2733f234a0b6a9382b09b146488ae08e2b22cf00f6c83e20f3e040a2f7894f05c045c946d6a090b1d52
-  languageName: node
-  linkType: hard
-
-"@cloudflare/workers-types@npm:4.20251001.0":
-  version: 4.20251001.0
-  resolution: "@cloudflare/workers-types@npm:4.20251001.0"
-  checksum: 10c0/444dfae8779b87106b1d7b784832c874b8f89b153b3b9b11a792d9db24fe636b4a941318b3917b0abe2f0d5dcb526a9d99b6ff886a7018a2e4c703284bbea29b
   languageName: node
   linkType: hard
 
@@ -4851,6 +4862,7 @@ __metadata:
     "@azure/functions": "npm:^4.10.0"
     "@azure/identity": "npm:^4.13.0"
     "@azure/keyvault-secrets": "npm:^4.10.0"
+    "@azure/search-documents": "npm:^12.2.0"
     "@hono/zod-validator": "npm:0.7.3"
     "@types/node": "npm:24.6.1"
     dotenv: "npm:17.2.3"
@@ -4948,7 +4960,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "bright-idea@workspace:."
   dependencies:
-    "@cloudflare/workers-types": "npm:4.20251001.0"
     "@tsconfig/node22": "npm:22.0.2"
     sst: "npm:3.17.14"
   languageName: unknown
@@ -6385,7 +6396,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"events@npm:^3.3.0":
+"events@npm:^3.0.0, events@npm:^3.3.0":
   version: 3.3.0
   resolution: "events@npm:3.3.0"
   checksum: 10c0/d6b6f2adbccbcda74ddbab52ed07db727ef52e31a61ed26db9feb7dc62af7fc8e060defa65e5f8af9449b86b52cc1a1f6a79f2eafcf4e62add2b7a1fa4a432f6
@@ -6811,6 +6822,7 @@ __metadata:
     typescript: "npm:5.9.3"
     typescript-eslint: "npm:8.45.0"
     ulid: "npm:3.0.1"
+    use-debounce: "npm:^10.0.6"
     vaul: "npm:^1.1.2"
     vite: "npm:7.0.0"
     wled-js: "npm:0.0.2"
@@ -11090,6 +11102,15 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/f887488c6e6075cdad4962979da1714b217bcb1ee009a9e57ce9a844bcfc4c3a99e93983dfc2e5af9e0913824d24e730090ff255e902c516dcb58d2d3837e01c
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^10.0.6":
+  version: 10.0.6
+  resolution: "use-debounce@npm:10.0.6"
+  peerDependencies:
+    react: "*"
+  checksum: 10c0/f0745de48fc344e6f90ea24384f3c79bf0733d06649827241135847abd67ee8db32f523d490c3276bce9f5a6867194ab1c0187bf6b84cabe1dd679037f4a527e
   languageName: node
   linkType: hard
 

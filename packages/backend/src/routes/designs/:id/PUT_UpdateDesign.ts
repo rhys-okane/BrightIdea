@@ -7,6 +7,7 @@ import {zValidator} from "@hono/zod-validator";
 import {validateTurnstileTokenFromJsonBody} from "@src/middleware/ValidateTurnstileToken";
 import {updateDesignQuery} from "@src/database/queries/UpdateDesign";
 import type {DesignDataModel} from "@src/database/types/Design";
+import {aiSearchUpdateDesign} from "@src/search/actions/UpdateDesign";
 
 export function listenForUpdateDesignPUTRequest(app: HonoApp) {
 	app.put(
@@ -26,6 +27,7 @@ export function listenForUpdateDesignPUTRequest(app: HonoApp) {
 			};
 
 			await updateDesignQuery(updatedDesign);
+			await aiSearchUpdateDesign(updatedDesign);
 
 			return context.json(updatedDesign);
 		},

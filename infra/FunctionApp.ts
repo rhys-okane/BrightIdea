@@ -44,6 +44,10 @@ export async function buildFunctionApp({
 		location: resourceGroup.location,
 	});
 
+	const aiSearchEndpoint = aiSearchService.endpoint.apply(endpoint => {
+		return endpoint ?? "NO_ENDPOINT_FOUND";
+	});
+
 	const functionApp = new azurenative.web.WebApp("function-app", {
 		resourceGroupName: resourceGroup.name,
 		location: resourceGroup.location,
@@ -112,6 +116,18 @@ export async function buildFunctionApp({
 				{
 					name: "EMAIL_SERVICE_ENDPOINT",
 					value: $interpolate`https://${emailService.name}.communication.azure.com`,
+				},
+				{
+					name: "MEDIA_BLOB_CONTAINER_NAME",
+					value: mediaBlobContainer.name,
+				},
+				{
+					name: "AI_SEARCH_SERVICE_ENDPOINT",
+					value: aiSearchEndpoint,
+				},
+				{
+					name: "AI_SEARCH_INDEX_NAME",
+					value: "designs-index",
 				},
 			],
 			cors: {

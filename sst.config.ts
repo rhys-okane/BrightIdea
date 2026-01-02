@@ -44,37 +44,39 @@ export default $config({
 		});
 
 		// Wait for the storage account and resource group to be created before deploying further resources
-		const {functionApp, cosmosDbAccount, emailDomain} = $resolve([storageAccount, resourceGroup] as const).apply(
-			async ([storageAccount, resourceGroup]) => {
-				const {keyVault, turnstileSecret} = buildKeyVault(resourceGroup);
-				const applicationInsights = buildApplicationInsights(resourceGroup);
-				const {cosmosDbAccount} = buildCosmosDb(resourceGroup, storageAccount);
-				const {emailService, emailDomain} = buildEmailService(resourceGroup);
-				const mediaBlobContainer = buildMediaBlobContainer(resourceGroup, storageAccount);
-				const {aiSearchService} = await buildAiSearch(resourceGroup);
+		const {functionApp, cosmosDbAccount, emailDomain, aiSearchService} = $resolve([
+			storageAccount,
+			resourceGroup,
+		] as const).apply(async ([storageAccount, resourceGroup]) => {
+			const {keyVault, turnstileSecret} = buildKeyVault(resourceGroup);
+			const applicationInsights = buildApplicationInsights(resourceGroup);
+			const {cosmosDbAccount} = buildCosmosDb(resourceGroup, storageAccount);
+			const {emailService, emailDomain} = buildEmailService(resourceGroup);
+			const mediaBlobContainer = buildMediaBlobContainer(resourceGroup, storageAccount);
+			const {aiSearchService} = await buildAiSearch(resourceGroup);
 
-				const functionApp = await buildFunctionApp({
-					storageAccount,
-					resourceGroup,
-					turnstileSecret,
-					applicationInsights,
-					cosmosDbAccount,
-					keyVault,
-					emailService,
-					emailDomain,
-					mediaBlobContainer,
-					aiSearchService,
-				});
+			const functionApp = await buildFunctionApp({
+				storageAccount,
+				resourceGroup,
+				turnstileSecret,
+				applicationInsights,
+				cosmosDbAccount,
+				keyVault,
+				emailService,
+				emailDomain,
+				mediaBlobContainer,
+				aiSearchService,
+			});
 
-				buildStaticSite(storageAccount, resourceGroup, functionApp);
+			buildStaticSite(storageAccount, resourceGroup, functionApp);
 
-				return {
-					functionApp,
-					cosmosDbAccount,
-					emailDomain,
-				};
-			},
-		);
+			return {
+				functionApp,
+				cosmosDbAccount,
+				emailDomain,
+				aiSearchService,
+			};
+		});
 
 		return {
 			primaryStorageKey: storageAccountKeys.keys[0].value,
@@ -83,6 +85,7 @@ export default $config({
 			functionAppName: functionApp.name,
 			cosmosDbEndpoint: cosmosDbAccount.documentEndpoint,
 			emailDomain: emailDomain.fromSenderDomain,
+			aiSearchEndpoint: aiSearchService.endpoint,
 		};
 	},
 });

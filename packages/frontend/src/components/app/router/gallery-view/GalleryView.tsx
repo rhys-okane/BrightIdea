@@ -1,93 +1,107 @@
 import {Turnstile, type TurnstileInstance} from "@marsidev/react-turnstile";
-import {Spinner} from "@src/components/ui/spinner";
 import {useCallback, useEffect, useMemo, useRef, useState, type FC} from "react";
-import {useMyDesignsState, useOthersDesignsState} from "@src/store/hooks/UseDesignsState";
+import {useMyDesignsState} from "@src/store/hooks/UseDesignsState";
 import {useGalleryViewState} from "@src/store/hooks/UseGalleryViewState";
-import {useIsLoadingDesignsState} from "@src/store/hooks/UseIsLoadingDesignsState";
 import {DesignGrid} from "./design-grid/DesignGrid";
 import {
 	Pagination,
 	PaginationContent,
+	PaginationEllipsis,
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
 } from "@src/components/ui/pagination";
-import {apiFetchDesigns} from "@src/lib/api/FetchDesigns";
 import type {PlayableDesign} from "@src/store/types/design/StoreDesign";
-import {useHighBrowStore} from "@src/store/ZustandStore";
+import {SearchInput} from "@src/components/ui/derived/SearchInput";
+import {apiSearchDesigns} from "@src/lib/api/ApiSearchDesigns";
+import {getPageNumbers} from "./utils/GetPageNumbers";
+import {useDebounce} from "use-debounce";
+import {toast} from "react-toastify";
 
 const PAGE_SIZE = 14;
 
 export const GalleryView: FC = () => {
 	const [myDesigns] = useMyDesignsState();
-	const [othersDesigns] = useOthersDesignsState();
-	const [isLoadingDesigns] = useIsLoadingDesignsState();
 	const [, setIsInGalleryView] = useGalleryViewState();
 	const turnstileRef = useRef<TurnstileInstance>(null);
-
-	const showLoadingSpinner = useMemo(() => {
-		return isLoadingDesigns && myDesigns.length === 0 && othersDesigns.length === 0 && window.navigator.onLine;
-	}, [isLoadingDesigns, myDesigns.length, othersDesigns.length]);
 
 	const goBack = useCallback(() => {
 		setIsInGalleryView(false);
 	}, [setIsInGalleryView]);
 
-	const originalHasNextPage = useHighBrowStore(state => state.hasNextPage);
-
 	const [page, setPage] = useState(1);
-	const [fetchedPages, setFetchedPages] = useState<number[]>([1]);
-	const [hasMoreDesigns, setHasMoreDesigns] = useState(originalHasNextPage);
-	const [lastSeen, setLastSeen] = useState<Date | null>(
-		[...myDesigns, ...othersDesigns].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]?.createdAt ||
-			null,
-	);
+	const [totalCount, setTotalCount] = useState<number | undefined>();
+	const [search, setSearch] = useState("");
+	const [debouncedSearch] = useDebounce(search, 200);
+	const [isLoading, setIsLoading] = useState(true);
 
-	// Create our own copy of the designs array to allow us to query for more
-	const [designs, setDesigns] = useState<PlayableDesign[]>(
-		[...myDesigns, ...othersDesigns]
-			.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-			.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-	);
+	const [pages, setPages] = useState<Map<number, PlayableDesign[]>>(new Map());
+
+	const hasMoreDesigns = useMemo(() => {
+		if (!totalCount) return true;
+
+		return totalCount > page * PAGE_SIZE;
+	}, [totalCount, page]);
 
 	const visibleDesigns = useMemo(() => {
-		return designs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-	}, [designs, page]);
+		return pages.get(page) || [];
+	}, [pages, page]);
+
+	const onSearchChange = useCallback((newSearch: string) => {
+		setSearch(newSearch);
+		setPage(1);
+		setPages(new Map());
+		setTotalCount(999);
+	}, []);
 
 	useEffect(() => {
 		(async () => {
 			if (!hasMoreDesigns) return;
-			if (fetchedPages.includes(page)) return;
+			if (pages.has(page)) return;
 
-			setFetchedPages(prev => [...prev, page]);
-			const {designs: newDesigns, hasNextPage} = await apiFetchDesigns(PAGE_SIZE, lastSeen);
-			setLastSeen(newDesigns[newDesigns.length - 1]?.createdAt || null);
-			setHasMoreDesigns(hasNextPage);
+			const abortController = new AbortController();
 
-			if (newDesigns.length === 0) {
-				setHasMoreDesigns(false);
-				return;
-			}
+			try {
+				setIsLoading(true);
+				const {designs: newDesigns, totalCount} = await apiSearchDesigns(
+					debouncedSearch,
+					page,
+					PAGE_SIZE,
+					abortController.signal,
+				);
+				setIsLoading(false);
+				setTotalCount(totalCount);
 
-			// Merge in new designs, avoiding duplicates
-			setDesigns(prevDesigns =>
-				[...prevDesigns, ...newDesigns]
-					.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-					.map(a => {
-						const myDesign = myDesigns.find(d => d.id === a.id);
-						if (myDesign) {
-							return myDesign;
-						}
+				setPages(prev => {
+					const newPlayableDesigns = newDesigns.map<PlayableDesign>(design => {
+						const existingMyDesign = myDesigns.find(d => d.id === design.id);
+						if (existingMyDesign) return existingMyDesign;
 
 						return {
-							...a,
+							...design,
 							isMine: false,
 						};
-					}),
-			);
+					});
+
+					const newMap = new Map(prev);
+					newMap.set(page, newPlayableDesigns);
+					return newMap;
+				});
+			} catch {
+				if (!abortController.signal.aborted) {
+					setIsLoading(false);
+					toast.error("Failed to load designs. Please try again.");
+				}
+			}
+
+			return () => abortController.abort();
 		})();
-	}, [fetchedPages, hasMoreDesigns, lastSeen, myDesigns, page]);
+		// Don't rely on things that will be reset before debounceed search updates
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [debouncedSearch, hasMoreDesigns, myDesigns, page]);
+
+	const pageNumbers = useMemo(() => getPageNumbers(page, PAGE_SIZE, totalCount), [page, totalCount]);
 
 	return (
 		<main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center w-full">
@@ -96,14 +110,16 @@ export const GalleryView: FC = () => {
 				<p className="text-lg text-gray-400">Gallery</p>
 			</header>
 			<section className="flex flex-col items-center gap-6 w-full">
+				<SearchInput value={search} onChange={onSearchChange} loading={isLoading} />
+
 				<div className="w-full flex flex-col items-center gap-4">
-					{!showLoadingSpinner && designs.length === 0 && (
+					{!isLoading && visibleDesigns.length === 0 && (
 						<div className="text-center text-gray-400">
 							<p className="mb-4">No designs found. Create a new design to get started!</p>
 						</div>
 					)}
 
-					{showLoadingSpinner && <Spinner />}
+					{/* {isLoading && <Spinner />} */}
 
 					<DesignGrid designs={visibleDesigns} turnstileRef={turnstileRef} />
 				</div>
@@ -111,13 +127,39 @@ export const GalleryView: FC = () => {
 				<Pagination>
 					<PaginationContent>
 						<PaginationItem>
-							<PaginationPrevious disabled={page <= 1} onClick={() => setPage(page => page - 1)} />
+							<PaginationPrevious disabled={isLoading || page === 1} onClick={() => setPage(page - 1)} />
 						</PaginationItem>
+
+						{pageNumbers.map((pageNum, index) => {
+							if (pageNum === "ellipsis-start" || pageNum === "ellipsis-end") {
+								return (
+									<PaginationItem key={`ellipsis-${index}`}>
+										<PaginationEllipsis />
+									</PaginationItem>
+								);
+							}
+
+							return (
+								<PaginationItem key={pageNum}>
+									<PaginationLink
+										onClick={() => setPage(pageNum)}
+										isActive={pageNum === page}
+										className="cursor-pointer"
+										disabled={isLoading}
+									>
+										{pageNum}
+									</PaginationLink>
+								</PaginationItem>
+							);
+						})}
+
 						<PaginationItem>
-							<PaginationLink>{page}</PaginationLink>
-						</PaginationItem>
-						<PaginationItem>
-							<PaginationNext disabled={!hasMoreDesigns} onClick={() => setPage(page => page + 1)} />
+							<PaginationNext
+								onClick={() => setPage(page + 1)}
+								disabled={
+									!hasMoreDesigns || page >= Math.ceil(totalCount ?? 0 / PAGE_SIZE) || isLoading
+								}
+							/>
 						</PaginationItem>
 					</PaginationContent>
 				</Pagination>
