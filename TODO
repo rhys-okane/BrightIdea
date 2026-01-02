@@ -3,5 +3,7 @@
 - [x] AI Search
 - [ ] Design grid skeleton
 - [ ] Admin login
+ - [ ] Admin CRUD
+ - [ ] Auth0 to pull admin emails
 - [ ] Video upload
 - [ ] extra logging
