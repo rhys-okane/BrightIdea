@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@src/components/ui/dialog";
+import { CLOUDFLARE_TURNSTILE_SITE_KEY } from "@src/lib/api/constants/ApiConstants";
 
 interface Props {
   design: EditableStoreDesign;
@@ -182,7 +183,7 @@ export const DesignEditor: FC<Props> = ({ design, setEditingDesign }) => {
       <Turnstile
         ref={turnstileRef}
         className="absolute"
-        siteKey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
+        siteKey={CLOUDFLARE_TURNSTILE_SITE_KEY}
       />
 
       <Dialog>

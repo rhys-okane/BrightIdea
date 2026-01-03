@@ -1,11 +1,15 @@
-import type {AnimationFrame} from "@shared/types/AnimationFrame";
+import { stringToDate } from "@shared/models/api/utils/StringToDateCodec";
+import { animationFrameSchema } from "@shared/types/AnimationFrame";
+import z from "zod";
 
-export interface DesignDataModel {
-	id: string;
-	name: string;
-	frames: AnimationFrame[];
-	editToken: string;
-	createdBy: string;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export const designDataModelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  frames: z.array(animationFrameSchema),
+  editToken: z.string(),
+  createdBy: z.string(),
+  createdAt: stringToDate,
+  updatedAt: stringToDate,
+});
+
+export type DesignDataModel = z.infer<typeof designDataModelSchema>;

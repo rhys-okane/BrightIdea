@@ -1,9 +1,10 @@
 - [ ] CI/CD
 - [ ] Email
+- [x] Auth0 to pull admin emails (needs tested)
 - [x] AI Search
 - [ ] Design grid skeleton
 - [ ] Admin login
- - [ ] Admin CRUD
- - [ ] Auth0 to pull admin emails
+- [ ] Admin CRUD
 - [ ] Video upload
 - [ ] extra logging
+- [ ] fix/remove helmet coordinate mapping

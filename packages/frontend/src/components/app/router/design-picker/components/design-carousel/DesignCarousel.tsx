@@ -1,5 +1,5 @@
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import { DesignPreview } from "@src/components/app/router/design-picker/design-carousel/design-preview/DesignPreview";
+import { DesignPreview } from "@src/components/app/router/design-picker/components/design-carousel/design-preview/DesignPreview";
 import {
   Carousel,
   CarouselContent,
