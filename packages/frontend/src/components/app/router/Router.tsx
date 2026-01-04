@@ -8,11 +8,13 @@ import { usePlayingDesignState } from "@src/store/hooks/UsePlayingDesignState";
 import type { FC } from "react";
 import { GalleryView } from "./gallery-view/GalleryView";
 import { useAuthSync } from "@src/components/app/router/hooks/UseAuthSync";
+import { useViewingMediaForDesignState } from "@src/store/hooks/UseViewingMediaForDesignState";
 
 export const Router: FC = () => {
   const [editingDesign, setEditingDesign] = useEditingDesignState();
   const [playingDesignId] = usePlayingDesignState();
   const [showingGallery] = useGalleryViewState();
+  const [viewingMediaForDesign] = useViewingMediaForDesignState();
 
   useDesignPlayer();
   useAuthSync();
@@ -24,6 +26,9 @@ export const Router: FC = () => {
         setEditingDesign={setEditingDesign}
       />
     );
+  }
+
+  if (viewingMediaForDesign) {
   }
 
   if (playingDesignId === "audio") {

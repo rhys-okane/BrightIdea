@@ -22,6 +22,7 @@ export interface HighBrow {
   // TODO: Really should just be react router at this point but that's a lot of conversion work
   isInGalleryView: boolean;
   user: (User & { role: "Admin" | "User" }) | undefined;
+  viewingMediaForDesign: PlayableDesign | undefined;
 }
 
 export type CreateReducers<T> = {

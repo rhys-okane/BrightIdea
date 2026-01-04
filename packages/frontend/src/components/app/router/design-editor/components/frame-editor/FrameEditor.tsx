@@ -97,26 +97,39 @@ export const FrameEditor: FC<Props> = ({
   return (
     <div className="flex flex-col items-center gap-4 w-full select-none">
       <h2 className="text-2xl font-bold text-white">Frame Editor</h2>
-      <div className="grid gap-y-2 gap-x-12" style={gridCols}>
+
+      <div className="flex flex-row gap-8 items-center justify-center">
         <ShiftButton
-          direction="Up"
+          direction="Left"
           frame={frame}
           onFrameChange={onFrameChange}
         />
+        <div className="grid gap-y-2 gap-x-12" style={gridCols}>
+          <ShiftButton
+            direction="Up"
+            frame={frame}
+            onFrameChange={onFrameChange}
+          />
 
-        {frame.grid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => (
-            <Cell
-              key={`${rowIndex}-${colIndex}`}
-              cell={cell}
-              onClick={() => onCellClick("left", rowIndex, colIndex)}
-              onMouseEnter={() => onMouseEnter(rowIndex, colIndex)}
-            />
-          ))
-        )}
+          {frame.grid.map((row, rowIndex) =>
+            row.map((cell, colIndex) => (
+              <Cell
+                key={`${rowIndex}-${colIndex}`}
+                cell={cell}
+                onClick={() => onCellClick("left", rowIndex, colIndex)}
+                onMouseEnter={() => onMouseEnter(rowIndex, colIndex)}
+              />
+            ))
+          )}
 
+          <ShiftButton
+            direction="Down"
+            frame={frame}
+            onFrameChange={onFrameChange}
+          />
+        </div>
         <ShiftButton
-          direction="Down"
+          direction="Right"
           frame={frame}
           onFrameChange={onFrameChange}
         />

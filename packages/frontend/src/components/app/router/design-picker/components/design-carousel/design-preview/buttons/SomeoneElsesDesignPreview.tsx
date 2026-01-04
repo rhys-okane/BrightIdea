@@ -15,6 +15,7 @@ import {
 } from "@src/components/ui/dropdown-menu";
 import { useEditingDesignState } from "@src/store/hooks/UseEditingDesignState";
 import { useUserState } from "@src/store/hooks/UseUserState";
+import { useViewingMediaForDesignState } from "@src/store/hooks/UseViewingMediaForDesignState";
 import type {
   NewStoreDesign,
   SomeoneElsesStoreDesign,
@@ -33,6 +34,7 @@ export const SomeoneElsesDesignPreviewButtons: FC<Props> = ({
   const [, setEditingDesign] = useEditingDesignState();
   const [open, setOpen] = useState(false);
   const [user] = useUserState();
+  const [, setViewingMediaForDesign] = useViewingMediaForDesignState();
   const onDesignPlay = useOnDesignPlay();
   const adminDeleteDesignInApi = useAdminDeleteDesignInApi();
 
@@ -50,11 +52,11 @@ export const SomeoneElsesDesignPreviewButtons: FC<Props> = ({
     [setEditingDesign]
   );
 
-  const onDesignViewVideos = useCallback(
+  const onDesignViewMedia = useCallback(
     (designToView: SomeoneElsesStoreDesign) => {
-      // Implementation for viewing videos goes here
+      setViewingMediaForDesign(designToView);
     },
-    []
+    [setViewingMediaForDesign]
   );
 
   return (
@@ -81,7 +83,7 @@ export const SomeoneElsesDesignPreviewButtons: FC<Props> = ({
           tooltip="View videos of this design"
           icon={faClone}
           variant={"info"}
-          onClick={() => onDesignViewVideos(design)}
+          onClick={() => onDesignViewMedia(design)}
         />
       )}
 
@@ -97,9 +99,14 @@ export const SomeoneElsesDesignPreviewButtons: FC<Props> = ({
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Manage videos</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDesignViewMedia(design)}>
+                Manage media
+              </DropdownMenuItem>
 
-              <DropdownMenuItem onSelect={() => setOpen(true)}>
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => setOpen(true)}
+              >
                 Delete Design
               </DropdownMenuItem>
             </DropdownMenuContent>

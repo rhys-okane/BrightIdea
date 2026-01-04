@@ -1,10 +1,11 @@
-- [ ] CI/CD
-- [ ] Email
 - [x] Auth0 to pull admin emails (needs tested)
 - [x] AI Search
-- [ ] Design grid skeleton
-- [ ] Admin login
-- [ ] Admin CRUD
+- [x] Admin login
+- [x] Admin CRUD
+- [x] fix/remove helmet coordinate mapping
+- [x] Email
+- [ ] CI/CD
 - [ ] Video upload
+- [ ] Move frontend build job to second step for CI
+- [ ] Design grid skeleton
 - [ ] extra logging
-- [ ] fix/remove helmet coordinate mapping

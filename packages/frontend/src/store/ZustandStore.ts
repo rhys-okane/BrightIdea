@@ -15,6 +15,7 @@ const initialState: HighBrow = {
   playingDesign: undefined,
   isInGalleryView: false,
   user: undefined,
+  viewingMediaForDesign: undefined,
 };
 
 export const useHighBrowStore = create(
@@ -98,6 +99,13 @@ export const useHighBrowStore = create(
                 (d) => d.id !== design.id
               ),
             }));
+          },
+          setViewingMediaForDesign: (
+            payload: HighBrow["viewingMediaForDesign"]
+          ) => {
+            set({
+              viewingMediaForDesign: payload,
+            });
           },
         }),
         {

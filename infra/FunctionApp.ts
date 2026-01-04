@@ -20,10 +20,11 @@ interface FunctionAppParameters {
   storageAccount: azurenative.storage.StorageAccount;
   resourceGroup: azurenative.resources.ResourceGroup;
   turnstileSecret: azurenative.keyvault.Secret;
-  applicationInsights: azurenative.applicationinsights.Component;
+  applicationInsightsComponent: azurenative.applicationinsights.Component;
+  applicationInsightsWorkspace: azurenative.operationalinsights.Workspace;
   cosmosDbAccount: azurenative.cosmosdb.DatabaseAccount;
   keyVault: azurenative.keyvault.Vault;
-  emailService: azurenative.communication.EmailService;
+  communicationService: azurenative.communication.CommunicationService;
   emailDomain: azurenative.communication.Domain;
   mediaBlobContainer: azurenative.storage.BlobContainer;
   aiSearchService: azurenative.search.Service;
@@ -32,10 +33,11 @@ export async function buildFunctionApp({
   storageAccount,
   resourceGroup,
   turnstileSecret,
-  applicationInsights,
+  applicationInsightsComponent,
+  applicationInsightsWorkspace,
   cosmosDbAccount,
   keyVault,
-  emailService,
+  communicationService,
   emailDomain,
   mediaBlobContainer,
   aiSearchService,
@@ -134,7 +136,7 @@ export async function buildFunctionApp({
         },
         {
           name: "APPLICATIONINSIGHTS_CONNECTION_STRING",
-          value: applicationInsights.connectionString,
+          value: applicationInsightsComponent.connectionString,
         },
         {
           name: "COSMOS_ENDPOINT",
@@ -146,7 +148,7 @@ export async function buildFunctionApp({
         },
         {
           name: "EMAIL_SERVICE_ENDPOINT",
-          value: $interpolate`https://${emailService.name}.communication.azure.com`,
+          value: $interpolate`https://${communicationService.hostName}`,
         },
         {
           name: "MEDIA_BLOB_CONTAINER_NAME",
@@ -287,12 +289,20 @@ export async function buildFunctionApp({
             {
               actions: [
                 "Microsoft.Communication/CommunicationServices/Read",
+                "Microsoft.Communication/EmailServices/read",
+                "Microsoft.Communication/EmailServices/write",
+                "Microsoft.Communication/EmailServices/Domains/read",
+                "Microsoft.Communication/EmailServices/Domains/SenderUsernames/read",
+                "Microsoft.Communication/EmailServices/Domains/SuppressionLists/read",
+                "Microsoft.Communication/EmailServices/Domains/SuppressionLists/SuppressionListAddresses/read",
+                "Microsoft.Communication/Operations/read",
                 "Microsoft.Communication/CommunicationServices/Write",
+                "Microsoft.Communication/RegisteredSubscriptions/read",
               ],
             },
           ],
-          assignableScopes: [emailService.id],
-          scope: emailService.id,
+          assignableScopes: [communicationService.id],
+          scope: communicationService.id,
         }
       );
 
@@ -302,7 +312,19 @@ export async function buildFunctionApp({
         principalId: identity.principalId,
         principalType: "ServicePrincipal",
         roleDefinitionId: communicationServicesEmailSenderRole.id,
-        scope: emailService.id,
+        scope: communicationService.id,
+      }
+    );
+
+    new azurenative.authorization.RoleAssignment(
+      "functionAppLocalDevCommunicationServicesEmailSenderRole",
+      {
+        principalId: azurenative.authorization
+          .getClientConfigOutput()
+          .apply((config) => config.objectId),
+        principalType: process.env.DEPLOYMENT_USER_PRINCIPAL_TYPE,
+        roleDefinitionId: communicationServicesEmailSenderRole.id,
+        scope: communicationService.id,
       }
     );
 
@@ -339,6 +361,30 @@ export async function buildFunctionApp({
     principalType: "ServicePrincipal",
     roleDefinitionId: storageBlobDataContributorRole.id,
     scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${codeContainer.name}`,
+  });
+
+  new azurenative.monitor.DiagnosticSetting("function-app-diagnostic-setting", {
+    resourceUri: functionApp.id,
+    logs: [
+      {
+        category: "FunctionAppLogs",
+        enabled: true,
+        retentionPolicy: {
+          days: 0,
+          enabled: false,
+        },
+      },
+    ],
+    metrics: [
+      {
+        enabled: true,
+        retentionPolicy: {
+          days: 0,
+          enabled: false,
+        },
+      },
+    ],
+    workspaceId: applicationInsightsWorkspace.id,
   });
 
   return functionApp;
