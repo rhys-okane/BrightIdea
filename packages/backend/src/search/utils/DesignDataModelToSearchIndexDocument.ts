@@ -2,14 +2,9 @@ import type { DesignDataModel } from "@src/database/types/Design";
 import type { AISearchIndexDocument } from "../types/AISearchIndexDocument";
 import type { AnimationFrame } from "@shared/types/AnimationFrame";
 
-export function designDataModelToSearchIndexDocument(
-  design: DesignDataModel
-): AISearchIndexDocument {
+export function designDataModelToSearchIndexDocument(design: DesignDataModel): AISearchIndexDocument {
   const dominantColors = extractDominantColors(design.frames);
-  const totalDuration = design.frames.reduce(
-    (sum, frame) => sum + frame.duration,
-    0
-  );
+  const totalDuration = design.frames.reduce((sum, frame) => sum + frame.duration, 0);
 
   return {
     id: design.id,
@@ -21,6 +16,7 @@ export function designDataModelToSearchIndexDocument(
     totalDuration: totalDuration,
     dominantColors: dominantColors,
     framesJson: design.frames,
+    mediaFileNames: design.mediaFileNames,
   };
 }
 
@@ -34,9 +30,9 @@ function extractDominantColors(frames: AnimationFrame[]): string[] {
         if (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0) return;
 
         // Convert to hex
-        const hex = `#${rgb[0].toString(16).padStart(2, "0")}${rgb[1]
+        const hex = `#${rgb[0].toString(16).padStart(2, "0")}${rgb[1].toString(16).padStart(2, "0")}${rgb[2]
           .toString(16)
-          .padStart(2, "0")}${rgb[2].toString(16).padStart(2, "0")}`;
+          .padStart(2, "0")}`;
         colorSet.add(hex);
       });
     });

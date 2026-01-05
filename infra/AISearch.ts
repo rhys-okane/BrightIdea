@@ -1,13 +1,11 @@
-const DEPLOYMENT_USER_PRINCIPAL_TYPE =
-  process.env["DEPLOYMENT_USER_PRINCIPAL_TYPE"];
+const DEPLOYMENT_USER_PRINCIPAL_TYPE = process.env["DEPLOYMENT_USER_PRINCIPAL_TYPE"];
 if (!DEPLOYMENT_USER_PRINCIPAL_TYPE) {
-  throw new Error(
-    "Missing DEPLOYMENT_USER_PRINCIPAL_TYPE environment variable"
-  );
+  throw new Error("Missing DEPLOYMENT_USER_PRINCIPAL_TYPE environment variable");
 }
 
 export async function buildAiSearch(
-  resourceGroup: azurenative.resources.ResourceGroup
+  resourceGroup: azurenative.resources.ResourceGroup,
+  applicationInsightsWorkspace: azurenative.operationalinsights.Workspace
 ): Promise<{
   aiSearchService: azurenative.search.Service;
   indexName: string;
@@ -30,21 +28,17 @@ export async function buildAiSearch(
   // Give the deployment user access to create an index
   const SEARCH_INDEX_DATA_CONTRIBUTOR = "8ebe5a00-799e-43f5-93ac-243d3dce84a7";
 
-  const searchIndexDataContributorRole =
-    azurenative.authorization.getRoleDefinitionOutput({
-      roleDefinitionId: SEARCH_INDEX_DATA_CONTRIBUTOR,
-      scope: aiSearchService.id,
-    });
+  const searchIndexDataContributorRole = azurenative.authorization.getRoleDefinitionOutput({
+    roleDefinitionId: SEARCH_INDEX_DATA_CONTRIBUTOR,
+    scope: aiSearchService.id,
+  });
 
-  const deployUserRoleAssignment = new azurenative.authorization.RoleAssignment(
-    "deployment-user-search-contributor",
-    {
-      principalId: me.objectId,
-      principalType: DEPLOYMENT_USER_PRINCIPAL_TYPE,
-      roleDefinitionId: searchIndexDataContributorRole.id,
-      scope: aiSearchService.id,
-    }
-  );
+  const deployUserRoleAssignment = new azurenative.authorization.RoleAssignment("deployment-user-search-contributor", {
+    principalId: me.objectId,
+    principalType: DEPLOYMENT_USER_PRINCIPAL_TYPE,
+    roleDefinitionId: searchIndexDataContributorRole.id,
+    scope: aiSearchService.id,
+  });
 
   const indexDefinition = {
     name: "designs-index",
@@ -114,6 +108,12 @@ export async function buildAiSearch(
         retrievable: true,
         searchable: false,
       },
+      {
+        name: "mediaFileNames",
+        type: "Collection(Edm.String)",
+        searchable: false,
+        retrievable: true,
+      },
     ],
     suggesters: [
       {
@@ -130,7 +130,7 @@ export async function buildAiSearch(
 
   const indexJson = JSON.stringify(indexDefinition).replace(/'/g, "'\\''");
 
-  $resolve(deployUserRoleAssignment).apply(() => {
+  $resolve([aiSearchService, deployUserRoleAssignment]).apply(() => {
     new command.local.Command("create-designs-index", {
       create: $interpolate`
     		ACCESS_TOKEN=$(az account get-access-token --resource https://search.azure.com --query accessToken -o tsv) && \
@@ -146,6 +146,31 @@ export async function buildAiSearch(
     			--headers "Authorization=Bearer $ACCESS_TOKEN" || true
     	`,
     });
+  });
+
+  new azurenative.monitor.DiagnosticSetting("ai-search-diagnostic-setting", {
+    resourceUri: aiSearchService.id,
+    logs: [
+      {
+        categoryGroup: "allLogs",
+        enabled: true,
+        retentionPolicy: {
+          days: 0,
+          enabled: false,
+        },
+      },
+    ],
+    metrics: [
+      {
+        enabled: true,
+        category: "AllMetrics",
+        retentionPolicy: {
+          days: 0,
+          enabled: false,
+        },
+      },
+    ],
+    workspaceId: applicationInsightsWorkspace.id,
   });
 
   return {

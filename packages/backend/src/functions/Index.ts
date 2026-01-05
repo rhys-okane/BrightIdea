@@ -1,0 +1,2 @@
+import "./HttpTrigger";
+import "./MediaUploadBlobTrigger";

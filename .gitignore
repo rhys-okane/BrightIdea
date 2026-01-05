@@ -29,3 +29,8 @@ dist-ssr
 .sst*
 .env*
 !.env.example
+
+AzuriteConfig
+__azurite*
+__blobstorage__
+__queuestorage__

@@ -7,6 +7,7 @@ export const apiDesignSchema = z.object({
   name: z.string(),
   frames: z.array(animationFrameSchema),
   createdBy: z.string(),
+  mediaFileNames: z.array(z.string()),
   createdAt: stringToDate,
   updatedAt: stringToDate,
 });

@@ -4,10 +4,7 @@ import { DesignCarousel } from "@src/components/app/router/design-picker/compone
 import { useApiDesignSync } from "@src/components/app/router/design-picker/hooks/UseApiDesignSync";
 import { Spinner } from "@src/components/ui/spinner";
 import { CLOUDFLARE_TURNSTILE_SITE_KEY } from "@src/lib/api/constants/ApiConstants";
-import {
-  useMyDesignsState,
-  useOthersDesignsState,
-} from "@src/store/hooks/UseDesignsState";
+import { useMyDesignsState, useOthersDesignsState } from "@src/store/hooks/UseDesignsState";
 import { useEditingDesignState } from "@src/store/hooks/UseEditingDesignState";
 import { useGalleryViewState } from "@src/store/hooks/UseGalleryViewState";
 import { useIsLoadingDesignsState } from "@src/store/hooks/UseIsLoadingDesignsState";
@@ -24,12 +21,7 @@ export const DesignPicker: FC = () => {
   const turnstileRef = useRef<TurnstileInstance>(null);
 
   const showLoadingSpinner = useMemo(() => {
-    return (
-      isLoadingDesigns &&
-      myDesigns.length === 0 &&
-      othersDesigns.length === 0 &&
-      window.navigator.onLine
-    );
+    return isLoadingDesigns && myDesigns.length === 0 && othersDesigns.length === 0 && window.navigator.onLine;
   }, [isLoadingDesigns, myDesigns.length, othersDesigns.length]);
 
   const onCreateNewDesign = useCallback(() => {
@@ -49,18 +41,14 @@ export const DesignPicker: FC = () => {
   useApiDesignSync();
 
   const oneLiner = useMemo(() => {
-    return daftPunkOneLiners[
-      Math.floor(Math.random() * daftPunkOneLiners.length)
-    ];
+    return daftPunkOneLiners[Math.floor(Math.random() * daftPunkOneLiners.length)];
   }, []);
 
   return (
     <main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center w-full">
       <AuthComponent />
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
-          Bright Idea
-        </h1>
+        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">Bright Idea</h1>
         <p className="text-lg text-gray-400">{oneLiner}</p>
       </header>
       <section className="flex flex-col items-center gap-6 w-full">
@@ -69,9 +57,7 @@ export const DesignPicker: FC = () => {
 
           {!showLoadingSpinner && myDesigns.length === 0 && (
             <div className="text-center text-gray-400">
-              <p className="mb-4">
-                No designs found. Create a new design to get started!
-              </p>
+              <p className="mb-4">No designs found. Create a new design to get started!</p>
             </div>
           )}
 
@@ -85,7 +71,7 @@ export const DesignPicker: FC = () => {
           {!showLoadingSpinner && othersDesigns.length === 0 && (
             <div className="text-center text-gray-400">
               <p className="mb-4">
-                No-one has created a design yet :-(<br></br> Be the first!
+                No-one has created a design yet :-(<br></br> Tell your friends!
               </p>
             </div>
           )}

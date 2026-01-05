@@ -23,9 +23,7 @@ const indexes = [
 type LedCommand = [number, [number, number, number]];
 
 async function setLeds(commands: LedCommand[]) {
-  const orderedCommands = commands
-    .sort((a, b) => a[0] - b[0])
-    .map((cmd) => cmd[1]);
+  const orderedCommands = commands.sort((a, b) => a[0] - b[0]).map((cmd) => cmd[1]);
 
   try {
     console.log("Setting WLED LEDs");
@@ -52,7 +50,10 @@ async function setLeds(commands: LedCommand[]) {
 }
 
 export const useDesignPlayer = (): DesignPlayerState => {
-  const playingDesign = useHighBrowStore((state) => state.getPlayingDesign)();
+  const playingDesign = useHighBrowStore((state) => state.playingDesign)!;
+  if (playingDesign === "audio") {
+    throw new Error("Audio mode not supported in useDesignPlayer");
+  }
 
   const [state, setState] = useState<DesignPlayerState>({
     isPlaying: false,
@@ -72,10 +73,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
   });
 
   // Function to format LED command
-  const formatLedCommand = (
-    index: number,
-    rgb: RGBColour
-  ): [number, [number, number, number]] => {
+  const formatLedCommand = (index: number, rgb: RGBColour): [number, [number, number, number]] => {
     const [r, g, b] = rgb;
     return [index, [r, g, b]];
   };
@@ -97,9 +95,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
       await setLeds(commands);
 
       console.log(
-        `Sent frame ${animationStateRef.current.frameIndex} with ${
-          frame.grid.length * frame.grid[0].length
-        } LEDs`
+        `Sent frame ${animationStateRef.current.frameIndex} with ${frame.grid.length * frame.grid[0].length} LEDs`
       );
     } catch (error) {
       console.error("Error sending frame:", error);
@@ -163,9 +159,7 @@ export const useDesignPlayer = (): DesignPlayerState => {
           error: null,
         }));
 
-        console.log(
-          `Starting design: ${design.name} (${design.frames.length} frames)`
-        );
+        console.log(`Starting design: ${design.name} (${design.frames.length} frames)`);
 
         // Start the animation
         await playNextFrame();

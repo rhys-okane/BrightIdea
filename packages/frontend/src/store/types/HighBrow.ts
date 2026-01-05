@@ -12,13 +12,7 @@ export interface HighBrow {
   othersDesigns: SomeoneElsesStoreDesign[];
   myDesigns: MyStoreDesign[];
   editingDesign: MyStoreDesign | NewStoreDesign | undefined;
-  playingDesign:
-    | "audio"
-    | {
-        id: string;
-        isMine: boolean;
-      }
-    | undefined;
+  playingDesign: "audio" | PlayableDesign | undefined;
   // TODO: Really should just be react router at this point but that's a lot of conversion work
   isInGalleryView: boolean;
   user: (User & { role: "Admin" | "User" }) | undefined;
@@ -31,7 +25,6 @@ export type CreateReducers<T> = {
 
 export type HighBrowReducers = CreateReducers<HighBrow> & {
   setAudioMode: (payload: boolean) => void;
-  getPlayingDesign: () => PlayableDesign | undefined;
   storeMyDesign: (design: MyStoreDesign) => void;
   deleteMyDesign: (designId: string) => void;
   adminDeleteDesign: (design: PlayableDesign) => void;

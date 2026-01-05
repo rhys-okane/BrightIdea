@@ -15,10 +15,12 @@ export const getDesign = createMiddleware<
   if (!id || !isValidUlid(id)) {
     return context.json({ message: "Invalid design ID" }, 400);
   }
+  context.env.azureContext.info("GetDesign Middleware: Getting design with ID:", id);
 
   const design = await getDesignByIdQuery(id);
 
   if (!design) {
+    context.env.azureContext.info("GetDesign Middleware: Design not found with ID:", id);
     return context.json({ message: "Design not found" }, 404);
   }
 

@@ -1,12 +1,5 @@
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FC,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FC } from "react";
 import { useMyDesignsState } from "@src/store/hooks/UseDesignsState";
 import { useGalleryViewState } from "@src/store/hooks/UseGalleryViewState";
 import { DesignGrid } from "./design-grid/DesignGrid";
@@ -23,10 +16,10 @@ import type { PlayableDesign } from "@src/store/types/design/StoreDesign";
 import { SearchInput } from "@src/components/ui/derived/SearchInput";
 import { apiSearchDesigns } from "@src/lib/api/ApiSearchDesigns";
 import { getPageNumbers } from "./utils/GetPageNumbers";
-import { useDebounce } from "use-debounce";
 import { toast } from "react-toastify";
 import { CLOUDFLARE_TURNSTILE_SITE_KEY } from "@src/lib/api/constants/ApiConstants";
 import { AuthComponent } from "@src/components/app/router/design-picker/components/auth/AuthComponent";
+import { DesignGridSkeleton } from "./design-grid/DesignGridSkeleton";
 
 const PAGE_SIZE = 14;
 
@@ -42,7 +35,6 @@ export const GalleryView: FC = () => {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number | undefined>();
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 200);
   const [isLoading, setIsLoading] = useState(true);
 
   const [pages, setPages] = useState<Map<number, PlayableDesign[]>>(new Map());
@@ -80,7 +72,7 @@ export const GalleryView: FC = () => {
       try {
         setIsLoading(true);
         const { designs: newDesigns, totalCount } = await apiSearchDesigns(
-          debouncedSearch,
+          search,
           page,
           PAGE_SIZE,
           abortController.signal
@@ -89,28 +81,25 @@ export const GalleryView: FC = () => {
         setTotalCount(totalCount);
 
         setPages((prev) => {
-          const newPlayableDesigns = newDesigns.map<PlayableDesign>(
-            (design) => {
-              const existingMyDesign = myDesigns.find(
-                (d) => d.id === design.id
-              );
-              if (existingMyDesign) return existingMyDesign;
+          const newPlayableDesigns = newDesigns.map<PlayableDesign>((design) => {
+            const existingMyDesign = myDesigns.find((d) => d.id === design.id);
+            if (existingMyDesign) return existingMyDesign;
 
-              return {
-                ...design,
-                isMine: false,
-              };
-            }
-          );
+            return {
+              ...design,
+              isMine: false,
+            };
+          });
 
           const newMap = new Map(prev);
           newMap.set(page, newPlayableDesigns);
           return newMap;
         });
-      } catch {
+      } catch (error) {
         if (!abortController.signal.aborted) {
           setIsLoading(false);
           toast.error("Failed to load designs. Please try again.");
+          console.error("Failed to load designs for gallery view", error);
         }
       }
 
@@ -118,52 +107,35 @@ export const GalleryView: FC = () => {
     })();
     // Don't rely on things that will be reset before debounced search updates
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, hasMoreDesigns, myDesigns, page]);
+  }, [search, hasMoreDesigns, myDesigns, page]);
 
-  const pageNumbers = useMemo(
-    () => getPageNumbers(page, PAGE_SIZE, totalCount),
-    [page, totalCount]
-  );
+  const pageNumbers = useMemo(() => getPageNumbers(page, PAGE_SIZE, totalCount), [page, totalCount]);
 
   return (
     <main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center w-full">
       <AuthComponent />
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
-          Bright Idea
-        </h1>
+        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">Bright Idea</h1>
         <p className="text-lg text-gray-400">Gallery</p>
       </header>
       <section className="flex flex-col items-center gap-6 w-full">
-        <SearchInput
-          value={search}
-          onChange={onSearchChange}
-          loading={isLoading}
-        />
+        <SearchInput value={search} onChange={onSearchChange} loading={isLoading} />
 
         <div className="w-full flex flex-col items-center gap-4">
           {!isLoading && visibleDesigns.length === 0 && (
             <div className="text-center text-gray-400">
-              <p className="mb-4">
-                No designs found. Create a new design to get started!
-              </p>
+              <p className="mb-4">No designs found. Create a new design to get started!</p>
             </div>
           )}
 
-          <DesignGrid
-            designs={visibleDesigns}
-            turnstileRef={turnstileRef}
-            onDesignDelete={onDesignDelete}
-          />
+          {isLoading && <DesignGridSkeleton />}
+          <DesignGrid designs={visibleDesigns} turnstileRef={turnstileRef} onDesignDelete={onDesignDelete} />
         </div>
 
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious
-                disabled={isLoading || page === 1}
-                onClick={() => setPage(page - 1)}
-              />
+              <PaginationPrevious disabled={isLoading || page === 1} onClick={() => setPage(page - 1)} />
             </PaginationItem>
 
             {pageNumbers.map((pageNum, index) => {
@@ -192,11 +164,7 @@ export const GalleryView: FC = () => {
             <PaginationItem>
               <PaginationNext
                 onClick={() => setPage(page + 1)}
-                disabled={
-                  !hasMoreDesigns ||
-                  page >= Math.ceil(totalCount ?? 0 / PAGE_SIZE) ||
-                  isLoading
-                }
+                disabled={!hasMoreDesigns || page >= Math.ceil(totalCount ?? 0 / PAGE_SIZE) || isLoading}
               />
             </PaginationItem>
           </PaginationContent>

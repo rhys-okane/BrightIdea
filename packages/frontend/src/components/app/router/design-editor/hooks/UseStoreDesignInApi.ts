@@ -4,23 +4,13 @@ import type { APIUpdateDesignResponse } from "@shared/models/api/APIUpdateDesign
 import { apiCreateDesign, CreateDesignError } from "@src/lib/api/CreateDesign";
 import { apiUpdateDesign, UpdateDesignError } from "@src/lib/api/UpdateDesign";
 import { useEditingDesignState } from "@src/store/hooks/UseEditingDesignState";
-import type {
-  EditableStoreDesign,
-  MyStoreDesign,
-  NewStoreDesign,
-} from "@src/store/types/design/StoreDesign";
+import type { EditableStoreDesign, MyStoreDesign, NewStoreDesign } from "@src/store/types/design/StoreDesign";
 import { useHighBrowStore } from "@src/store/ZustandStore";
 import { useCallback, type RefObject } from "react";
 import { toast } from "react-toastify";
 
-async function doApiCall(
-  design: NewStoreDesign,
-  turnstileToken: string
-): Promise<APICreateDesignResponse>;
-async function doApiCall(
-  design: MyStoreDesign,
-  turnstileToken: string
-): Promise<APIUpdateDesignResponse>;
+async function doApiCall(design: NewStoreDesign, turnstileToken: string): Promise<APICreateDesignResponse>;
+async function doApiCall(design: MyStoreDesign, turnstileToken: string): Promise<APIUpdateDesignResponse>;
 async function doApiCall(
   design: EditableStoreDesign,
   turnstileToken: string
@@ -42,9 +32,7 @@ async function doApiCall(
   });
 }
 
-export const useStoreDesignInApi = (
-  turnstileRef: RefObject<TurnstileInstance | null>
-) => {
+export const useStoreDesignInApi = (turnstileRef: RefObject<TurnstileInstance | null>) => {
   const storeMyDesign = useHighBrowStore((state) => state.storeMyDesign);
   const [, setEditingDesignId] = useEditingDesignState();
 
@@ -75,12 +63,12 @@ export const useStoreDesignInApi = (
             : await doApiCall(design, turnstileToken);
 
           storeMyDesign({
+            updatedAt: new Date(),
             ...newDesign,
             isMine: true,
             isNew: false,
-            editToken: design.isNew
-              ? (newDesign as APICreateDesignResponse).editToken
-              : design.editToken,
+            editToken: design.isNew ? (newDesign as APICreateDesignResponse).editToken : design.editToken,
+            mediaFileNames: [],
           });
 
           toast.update(loadingId, {
@@ -92,14 +80,10 @@ export const useStoreDesignInApi = (
           setEditingDesignId(undefined);
         } catch (error) {
           console.error("Error storing design in API", error);
-          if (
-            error instanceof CreateDesignError ||
-            error instanceof UpdateDesignError
-          ) {
+          if (error instanceof CreateDesignError || error instanceof UpdateDesignError) {
             if (error.type === "conflict") {
               return void toast.update(loadingId, {
-                render:
-                  "A design with that name already exists. Please choose a different name.",
+                render: "A design with that name already exists. Please choose a different name.",
                 type: "error",
                 isLoading: false,
                 autoClose: 5000,
@@ -126,8 +110,7 @@ export const useStoreDesignInApi = (
 
             if (error.type === "network") {
               return void toast.update(loadingId, {
-                render:
-                  "Network error. Please check your connection and try again.",
+                render: "Network error. Please check your connection and try again.",
                 type: "error",
                 isLoading: false,
                 autoClose: 5000,

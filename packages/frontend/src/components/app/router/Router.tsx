@@ -9,6 +9,7 @@ import type { FC } from "react";
 import { GalleryView } from "./gallery-view/GalleryView";
 import { useAuthSync } from "@src/components/app/router/hooks/UseAuthSync";
 import { useViewingMediaForDesignState } from "@src/store/hooks/UseViewingMediaForDesignState";
+import { ViewMedia } from "./view-media/ViewMedia";
 
 export const Router: FC = () => {
   const [editingDesign, setEditingDesign] = useEditingDesignState();
@@ -20,15 +21,11 @@ export const Router: FC = () => {
   useAuthSync();
 
   if (editingDesign) {
-    return (
-      <DesignEditor
-        design={editingDesign}
-        setEditingDesign={setEditingDesign}
-      />
-    );
+    return <DesignEditor design={editingDesign} setEditingDesign={setEditingDesign} />;
   }
 
   if (viewingMediaForDesign) {
+    return <ViewMedia design={viewingMediaForDesign} />;
   }
 
   if (playingDesignId === "audio") {

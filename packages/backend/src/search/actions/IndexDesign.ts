@@ -4,8 +4,6 @@ import { aiSearchIndexDocumentSchema } from "../types/AISearchIndexDocument";
 import { designDataModelToSearchIndexDocument } from "../utils/DesignDataModelToSearchIndexDocument";
 
 export async function aiSearchIndexDesign(design: DesignDataModel) {
-  console.log(design);
-  console.log(designDataModelToSearchIndexDocument(design));
   const { results } = await searchClient.uploadDocuments([
     aiSearchIndexDocumentSchema.encode(
       designDataModelToSearchIndexDocument(design)

@@ -1,35 +1,37 @@
-import {apiFetchDesigns} from "@src/lib/api/FetchDesigns";
-import {useMyDesignsState} from "@src/store/hooks/UseDesignsState";
-import {useIsLoadingDesignsState} from "@src/store/hooks/UseIsLoadingDesignsState";
-import {extractOthersDesignsFromAPI} from "@src/store/utils/MergeStoreDesigns";
-import {useHighBrowStore} from "@src/store/ZustandStore";
-import {useRef} from "react";
-import {toast} from "react-toastify";
+import { apiFetchDesigns } from "@src/lib/api/FetchDesigns";
+import { useMyDesignsState } from "@src/store/hooks/UseDesignsState";
+import { useIsLoadingDesignsState } from "@src/store/hooks/UseIsLoadingDesignsState";
+import { extractOthersDesignsFromAPI } from "@src/store/utils/MergeStoreDesigns";
+import { useHighBrowStore } from "@src/store/ZustandStore";
+import { useRef } from "react";
+import { toast } from "react-toastify";
 
 export const useApiDesignSync = () => {
-	const hasFetched = useRef(false);
-	const [, setIsLoadingDesigns] = useIsLoadingDesignsState();
-	const setOthersDesigns = useHighBrowStore(state => state.setOthersDesigns);
-	const [myDesigns] = useMyDesignsState();
+  const hasFetched = useRef(false);
+  const [, setIsLoadingDesigns] = useIsLoadingDesignsState();
+  const setOthersDesigns = useHighBrowStore((state) => state.setOthersDesigns);
+  const [myDesigns, setMyDesigns] = useMyDesignsState();
 
-	if (!hasFetched.current) {
-		if (!window.navigator.onLine) {
-			return void toast.info("You are offline, but you can still play any pre-existing designs.");
-		}
-		setIsLoadingDesigns(true);
+  if (!hasFetched.current) {
+    if (!window.navigator.onLine) {
+      return void toast.info("You are offline, but you can still play any pre-existing designs.");
+    }
+    setIsLoadingDesigns(true);
 
-		(async () => {
-			try {
-				const {designs} = await apiFetchDesigns(100, null);
-				setOthersDesigns(extractOthersDesignsFromAPI(myDesigns, designs));
-			} catch (error) {
-				console.error("Failed to fetch designs:", error);
-				toast.error("Failed to fetch designs");
-			} finally {
-				setIsLoadingDesigns(false);
-			}
-		})();
+    (async () => {
+      try {
+        const { designs } = await apiFetchDesigns(100, null);
+        const { myDesigns: newMyDesigns, othersDesigns } = extractOthersDesignsFromAPI(myDesigns, designs);
+        setMyDesigns(newMyDesigns);
+        setOthersDesigns(othersDesigns);
+      } catch (error) {
+        console.error("Failed to fetch designs:", error);
+        toast.error("Failed to fetch designs");
+      } finally {
+        setIsLoadingDesigns(false);
+      }
+    })();
 
-		hasFetched.current = true;
-	}
+    hasFetched.current = true;
+  }
 };

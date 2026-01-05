@@ -7,6 +7,8 @@ import { listenForUpdateDesignPUTRequest } from "./routes/designs/:id/PUT_Update
 import { listenForDeleteDesignDELETERequest } from "./routes/designs/:id/DELETE_DeleteDesign";
 import { listenForGetSearchDesignsGETRequest } from "./routes/designs/GET_SearchDesigns";
 import { listenForUserMeGETRequest } from "@src/routes/users/GET_Me";
+import { listenForGETMediaUploadUrl } from "./routes/designs/:id/GET_MediaUploadUrl";
+import { listenForDELETEMediaFileRequest } from "./routes/designs/:id/DELETE_MediaFile";
 
 export interface HonoContext {
   Bindings: {
@@ -14,9 +16,7 @@ export interface HonoContext {
   };
 }
 
-const app = new Hono<HonoContext>().get("/", (c) =>
-  c.json({ message: "Hello from Hono!" })
-);
+const app = new Hono<HonoContext>().get("/", (c) => c.json({ message: "Hello from Hono!" }));
 export type HonoApp = typeof app;
 
 app.use("*", cors());
@@ -39,6 +39,8 @@ listenForGetSearchDesignsGETRequest(app);
 listenForCreateDesignPOSTRequest(app);
 listenForDeleteDesignDELETERequest(app);
 listenForUpdateDesignPUTRequest(app);
+listenForGETMediaUploadUrl(app);
+listenForDELETEMediaFileRequest(app);
 
 listenForUserMeGETRequest(app);
 
