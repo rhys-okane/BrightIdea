@@ -27,17 +27,13 @@ export function listenForUpdateDesignPUTRequest(app: HonoApp) {
 
       await updateDesignQuery(updatedDesign);
       await aiSearchUpdateDesign(updatedDesign);
-      await sendDesignUpdateNotificationEmail(
-        updatedDesign,
-        context.env.azureContext
-      ).catch((error) => {
-        context.env.azureContext.warn(
-          "Failed to send design update notification email",
-          error
-        );
-      });
 
-      return context.json(updatedDesign);
+      context.json(updatedDesign);
+
+      // Send email notification asynchronously
+      await sendDesignUpdateNotificationEmail(updatedDesign, context.env.azureContext).catch((error) => {
+        context.env.azureContext.warn("Failed to send design update notification email", error);
+      });
     }
   );
 }

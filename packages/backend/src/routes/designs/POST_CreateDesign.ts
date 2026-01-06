@@ -1,9 +1,4 @@
-import {
-  apiCreateDesignRequestSchema,
-  apiCreateDesignResponseSchema,
-  type APICreateDesignResponse,
-} from "@shared/models/api/APICreateDesignRequest";
-import { designsTable } from "@src/database/schema/Designs";
+import { apiCreateDesignRequestSchema, type APICreateDesignResponse } from "@shared/models/api/APICreateDesignRequest";
 import { ulid } from "ulid";
 import type { HonoApp } from "@src/App";
 import { zValidator } from "@hono/zod-validator";
@@ -41,11 +36,8 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
 
       await createDesignQuery(newDesign);
       await aiSearchIndexDesign(newDesign);
-      await sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch((error) => {
-        context.env.azureContext.warn("Failed to send design creation notification email", error);
-      });
 
-      return context.json<APICreateDesignResponse>(
+      context.json<APICreateDesignResponse>(
         {
           id: newDesign.id,
           name: newDesign.name,
@@ -56,6 +48,11 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
         },
         201
       );
+
+      // Send email notification asynchronously
+      await sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch((error) => {
+        context.env.azureContext.warn("Failed to send design creation notification email", error);
+      });
     }
   );
 }
