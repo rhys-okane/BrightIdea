@@ -54,6 +54,13 @@ jobs:
           VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
           VITE_MEDIA_CONTAINER_URL: TODO
 
+      - name: Pull SST state
+        run: bash ./scripts/download_sst_state.sh
+        env:
+          SST_STAGE: production
+          AZURE_STORAGE_ACCOUNT: brightideacistate
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY_BRIGHTIDEACISTATE }}
+
       - name: Deploy to production
         run: yarn sst deploy
         env:
