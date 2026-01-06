@@ -413,7 +413,9 @@ export async function buildFunctionApp({
 
   const containerScope = $interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}/blobServices/default/containers/${mediaBlobContainer.name}`;
 
-  console.log(endpointUrl);
+  endpointUrl.apply((endpointUrl) => {
+    console.log("Event Grid Blob Trigger Endpoint URL:", endpointUrl);
+  });
 
   const eventSubscriptionWebhook = new azurenative.eventgrid.EventSubscription("blobEventsTrigger", {
     scope: containerScope,
