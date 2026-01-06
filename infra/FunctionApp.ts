@@ -395,5 +395,34 @@ export async function buildFunctionApp({
     workspaceId: applicationInsightsWorkspace.id,
   });
 
+  const hostKeys = azurenative.web.listWebAppHostKeysOutput({
+    name: functionApp.name,
+    resourceGroupName: resourceGroup.name,
+  });
+  const functionKey = hostKeys.functionKeys?.apply((keys) => {
+    if (!keys) {
+      throw new Error("No function keys found");
+    }
+    console.log("Function Keys:", keys);
+    return Object.values(keys)[0];
+  });
+
+  const defaultHostName = functionApp.defaultHostName.apply((h) => `https://${h}`);
+  const endpointUrl = $interpolate`
+  ${defaultHostName}/runtime/webhooks/EventGrid?functionName=${functionApp.name}&code=${functionKey}`;
+
+  const containerScope = $interpolate`/subscriptions/${azurenative.config.subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}/blobServices/default/containers/${mediaBlobContainer.name}`;
+
+  const eventSubWebhook = new azurenative.eventgrid.EventSubscription("blobEventsWH", {
+    scope: containerScope,
+    destination: {
+      endpointType: "WebHook",
+      endpointUrl: endpointUrl,
+    },
+    filter: {
+      includedEventTypes: ["Microsoft.Storage.BlobCreated"],
+    },
+  });
+
   return functionApp;
 }

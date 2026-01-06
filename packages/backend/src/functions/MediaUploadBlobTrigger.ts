@@ -18,6 +18,7 @@ app.storageBlob("MediaUploadBlobTrigger", {
   sdkBinding: true,
   path: `${mediaBlobContainerName}/{designId}/{fileName}`,
   connection: "AzureWebJobsMediaContainer",
+  source: "EventGrid",
   // @ts-expect-error Bad types from the Azure library
   handler: storageBlobTrigger,
 });
