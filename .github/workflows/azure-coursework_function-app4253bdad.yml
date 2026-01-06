@@ -41,6 +41,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F4B15379219E415CAE7C3E7BAEEFE327 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4055B9E0C15148E495917898E414FBCA }}
 
+      - name: Show Azure account info
+        run: az account show
+
       - name: Install dependencies
         run: yarn install --immutable
 
