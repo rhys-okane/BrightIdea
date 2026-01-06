@@ -33,6 +33,18 @@ jobs:
 
       - name: Install Azure CLI
         run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+
+      - name: Set up secret file
+        env:
+          AZUREAPPSERVICE_CLIENTID_FDF1400B3AD84CE5ADEE40F490097E4C: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FDF1400B3AD84CE5ADEE40F490097E4C }}
+          AZUREAPPSERVICE_TENANTID_F4B15379219E415CAE7C3E7BAEEFE327: ${{ secrets.AZUREAPPSERVICE_TENANTID_F4B15379219E415CAE7C3E7BAEEFE327 }}
+        run: |
+          echo $AZUREAPPSERVICE_CLIENTID_FDF1400B3AD84CE5ADEE40F490097E4C >> secrets.txt
+          echo $AZUREAPPSERVICE_TENANTID_F4B15379219E415CAE7C3E7BAEEFE327 >> secrets.txt
+
+      - name: Run tmate
+        uses: mxschmitt/action-tmate@v2
         
       - name: Login to Azure
         uses: azure/login@v2
