@@ -47,15 +47,22 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Pull SST outputs
+        id: sst-outputs
+        run: |
+          echo "storage_account_name=$(jq -r '.storageAccountName' .sst/outputs.json)" >> $GITHUB_OUTPUT
+          echo "media_container_name=$(jq -r '.mediaContainerName' .sst/outputs.json)" >> $GITHUB_OUTPUT
+          echo "function_app_name=$(jq -r '.functionAppName' .sst/outputs.json)" >> $GITHUB_OUTPUT
+
       - name: Build frontend
         working-directory: packages/frontend
         run: yarn build
         env: 
-          VITE_API_URL: TODO
+          VITE_API_URL: ${{ format('https://{0}.azurewebsites.net', steps.sst-outputs.outputs.function_app_name) }}
+          VITE_MEDIA_CONTAINER_URL: ${{ format('https://{0}.blob.core.windows.net/{1}', steps.sst-outputs.outputs.storage_account_name, steps.sst-outputs.outputs.media_container_name) }}
           VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY }}
           VITE_AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
           VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
-          VITE_MEDIA_CONTAINER_URL: TODO
 
       - name: Pull SST state
         run: bash ./scripts/download_sst_state.sh
