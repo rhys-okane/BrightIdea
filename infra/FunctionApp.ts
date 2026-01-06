@@ -59,10 +59,13 @@ export async function buildFunctionApp({
 
   const getConnectionString = (await import("./utils/BlobStorageConnectionString")).getConnectionString;
 
-  const userAssignedIdentity = new azurenative.managedidentity.UserAssignedIdentity(`function-app-identity-${$app.stage}`, {
-    resourceGroupName: resourceGroup.name,
-    location: resourceGroup.location,
-  });
+  const userAssignedIdentity = new azurenative.managedidentity.UserAssignedIdentity(
+    `function-app-identity-${$app.stage}`,
+    {
+      resourceGroupName: resourceGroup.name,
+      location: resourceGroup.location,
+    }
+  );
 
   const aiSearchEndpoint = aiSearchService.endpoint.apply((endpoint) => {
     return endpoint ?? "NO_ENDPOINT_FOUND";
@@ -184,6 +187,10 @@ export async function buildFunctionApp({
         {
           name: "AzureWebJobsMediaContainer__queueServiceUri",
           value: $interpolate`https://${storageAccount.name}.queue.core.windows.net`,
+        },
+        {
+          name: "AzureWebJobsMediaContainer__credential",
+          value: "managedidentity",
         },
       ],
       cors: {
@@ -316,7 +323,7 @@ export async function buildFunctionApp({
 
     // Access to the media blob container
     new azurenative.authorization.RoleAssignment("mediaBlobContainerAccess", {
-      principalId: userAssignedIdentity.principalId,
+      principalId: identity.principalId,
       principalType: "ServicePrincipal",
       roleDefinitionId: storageBlobDataContributorRole.id,
       scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${mediaBlobContainer.name}`,
