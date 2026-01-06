@@ -401,30 +401,31 @@ export async function buildFunctionApp({
     name: functionApp.name,
     resourceGroupName: resourceGroup.name,
   });
-  const functionKey = hostKeys.functionKeys?.apply((keys) => {
+  const blobsExtensionFunctionKey = hostKeys.systemKeys?.apply((keys) => {
     if (!keys) {
       throw new Error("No function keys found");
     }
-    console.log("Function Keys:", keys);
-    return Object.values(keys)[0];
+    return keys["blobs_extension"];
   });
 
   const defaultHostName = functionApp.defaultHostName.apply((h) => `https://${h}`);
-  const endpointUrl = $interpolate`
-  ${defaultHostName}/runtime/webhooks/EventGrid?functionName=${functionApp.name}&code=${functionKey}`;
+  const endpointUrl = $interpolate`${defaultHostName}/runtime/webhooks/blobs?functionName=Host.Functions.EventGridBlobTrigger&code=${blobsExtensionFunctionKey}`;
 
   const containerScope = $interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}/blobServices/default/containers/${mediaBlobContainer.name}`;
 
-  const eventSubWebhook = new azurenative.eventgrid.EventSubscription("blobEventsWH", {
-    scope: containerScope,
-    destination: {
-      endpointType: "WebHook",
-      endpointUrl: endpointUrl,
-    },
-    filter: {
-      includedEventTypes: ["Microsoft.Storage.BlobCreated"],
-    },
-  });
+  console.log(endpointUrl);
+
+  // const eventSubscriptionWebhook = new azurenative.eventgrid.EventSubscription("blobEventsTrigger", {
+  //   scope: containerScope,
+  //   eventDeliverySchema: "EventGridSchema",
+  //   destination: {
+  //     endpointType: "WebHook",
+  //     endpointUrl: endpointUrl,
+  //   },
+  //   filter: {
+  //     includedEventTypes: ["Microsoft.Storage.BlobCreated"],
+  //   },
+  // });
 
   return functionApp;
 }

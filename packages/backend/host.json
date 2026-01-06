@@ -24,7 +24,7 @@
   },
   "extensions": {
     "http": {
-      "routePrefix": ""
+      "routePrefix": "/api"
     },
     "blobs": {
       "maxDegreeOfParallelism": 4

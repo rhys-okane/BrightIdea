@@ -14,7 +14,7 @@ app.setup({
   enableHttpStream: true,
 });
 
-app.storageBlob("MediaUploadBlobTrigger", {
+app.storageBlob("EventGridBlobTrigger", {
   sdkBinding: true,
   path: `${mediaBlobContainerName}/{designId}/{fileName}`,
   connection: "AzureWebJobsMediaContainer",

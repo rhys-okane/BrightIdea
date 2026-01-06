@@ -1,2 +1,2 @@
 import "./HttpTrigger";
-import "./MediaUploadBlobTrigger";
+import "./EventGridBlobTrigger";
