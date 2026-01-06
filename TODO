@@ -10,5 +10,4 @@
 - [x] Change playing design ID to playing design so that we don't need to store it in the store to make that work with media
 - [x] Design grid skeleton
 - [ ] CI/CD
-- [ ] extra logging
 - [ ] hook all resources up to application insights

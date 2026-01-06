@@ -1,7 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
-import path = require("path");
-
 export default $config({
   app(input) {
     return {
@@ -30,8 +28,8 @@ export default $config({
     const { buildMediaBlobContainer } = await import("./infra/MediaBlobContainer");
     const { buildAiSearch } = await import("./infra/AISearch");
 
-    const resourceGroup = new azurenative.resources.ResourceGroup("BrightIdeaDevResourceGroup");
-    const storageAccount = new azurenative.storage.StorageAccount("storageaccount", {
+    const resourceGroup = new azurenative.resources.ResourceGroup(`BrightIdeaDevResourceGroup-${$app.stage}`);
+    const storageAccount = new azurenative.storage.StorageAccount(`storageaccount`, {
       resourceGroupName: resourceGroup.name,
       sku: {
         name: azurenative.storage.SkuName.Standard_LRS,
@@ -63,13 +61,59 @@ export default $config({
       },
     });
 
+    const applicationInsights = buildApplicationInsights(resourceGroup);
+
+    new azurenative.monitor.DiagnosticSetting("storage-account-diagnostic-setting", {
+      resourceUri: storageAccount.id,
+      logs: [],
+      metrics: [
+        {
+          enabled: true,
+          category: "Transaction",
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      workspaceId: applicationInsights.workspace.id,
+    });
+
+    new azurenative.monitor.DiagnosticSetting("storage-account-blobs-diagnostic-setting", {
+      resourceUri: azurenative.storage.getBlobServicePropertiesOutput({
+        blobServicesName: "default",
+        accountName: storageAccount.name,
+        resourceGroupName: resourceGroup.name,
+      }).id,
+      logs: [
+        {
+          categoryGroup: "allLogs",
+          enabled: true,
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      metrics: [
+        {
+          enabled: true,
+          category: "Transaction",
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      workspaceId: applicationInsights.workspace.id,
+    });
+
     // Wait for the storage account and resource group to be created before deploying further resources
     const { functionApp, cosmosDbAccount, communicationService, emailDomain, aiSearchService, mediaBlobContainer } =
       $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
         async ([storageAccount, resourceGroup, storageAccountKeys]) => {
-          const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup);
-          const applicationInsights = buildApplicationInsights(resourceGroup);
-          const { cosmosDbAccount } = buildCosmosDb(resourceGroup, storageAccount);
+          const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
+          const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
           const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
           const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
           const { aiSearchService } = await buildAiSearch(resourceGroup, applicationInsights.workspace);

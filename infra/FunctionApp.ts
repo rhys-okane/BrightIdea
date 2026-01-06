@@ -42,12 +42,12 @@ export async function buildFunctionApp({
   aiSearchService,
   primaryStorageKey,
 }: FunctionAppParameters) {
-  const codeContainer = new azurenative.storage.BlobContainer("function-app-code-zips", {
+  const codeContainer = new azurenative.storage.BlobContainer(`function-app-code-zips-${$app.stage}`, {
     resourceGroupName: resourceGroup.name,
     accountName: storageAccount.name,
   });
 
-  const appServicePlan = new azurenative.web.AppServicePlan("app-service-plan", {
+  const appServicePlan = new azurenative.web.AppServicePlan(`app-service-plan-${$app.stage}`, {
     resourceGroupName: resourceGroup.name,
     kind: "FunctionApp",
     reserved: true,
@@ -59,7 +59,7 @@ export async function buildFunctionApp({
 
   const getConnectionString = (await import("./utils/BlobStorageConnectionString")).getConnectionString;
 
-  const userAssignedIdentity = new azurenative.managedidentity.UserAssignedIdentity("function-app-identity", {
+  const userAssignedIdentity = new azurenative.managedidentity.UserAssignedIdentity(`function-app-identity-${$app.stage}`, {
     resourceGroupName: resourceGroup.name,
     location: resourceGroup.location,
   });
@@ -68,7 +68,7 @@ export async function buildFunctionApp({
     return endpoint ?? "NO_ENDPOINT_FOUND";
   });
 
-  const functionApp = new azurenative.web.WebApp("function-app", {
+  const functionApp = new azurenative.web.WebApp(`function-app-${$app.stage}`, {
     resourceGroupName: resourceGroup.name,
     location: resourceGroup.location,
     serverFarmId: appServicePlan.id,
