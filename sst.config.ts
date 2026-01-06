@@ -11,6 +11,7 @@ export default $config({
         "azure-native": {
           version: "3.8.0",
           location: "UK South",
+          useOidc: process.env.CI === "true" ? true : undefined,
         },
         random: "4.18.2",
         command: "1.1.3",
