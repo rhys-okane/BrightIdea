@@ -88,7 +88,7 @@ jobs:
           VITE_MEDIA_CONTAINER_URL: ${{ format('https://{0}.blob.core.windows.net/{1}', steps.sst-outputs.outputs.storage_account_name, steps.sst-outputs.outputs.media_container_name) }}
           VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY }}
           VITE_AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
-          VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_SITE_CLIENT_ID }}
 
       - name: Deploy frontend
         run: bash ./scripts/deploy_frontend.sh
