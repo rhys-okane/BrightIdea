@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          corepack: yarn
           cache: yarn
 
       - name: Install Azure CLI
