@@ -29,134 +29,134 @@ export default $config({
     const { buildAiSearch } = await import("./infra/AISearch");
 
     const resourceGroup = new azurenative.resources.ResourceGroup(`BrightIdeaDevResourceGroup-${$app.stage}`);
-    // const storageAccount = new azurenative.storage.StorageAccount(`storageaccount`, {
-    //   resourceGroupName: resourceGroup.name,
-    //   sku: {
-    //     name: azurenative.storage.SkuName.Standard_LRS,
-    //   },
-    //   accessTier: azurenative.storage.AccessTier.Hot,
-    //   kind: "StorageV2",
-    //   allowBlobPublicAccess: true,
-    // });
-    // const storageAccountKeys = azurenative.storage.listStorageAccountKeysOutput({
-    //   resourceGroupName: resourceGroup.name,
-    //   accountName: storageAccount.name,
-    // });
+    const storageAccount = new azurenative.storage.StorageAccount(`storageaccount`, {
+      resourceGroupName: resourceGroup.name,
+      sku: {
+        name: azurenative.storage.SkuName.Standard_LRS,
+      },
+      accessTier: azurenative.storage.AccessTier.Hot,
+      kind: "StorageV2",
+      allowBlobPublicAccess: true,
+    });
+    const storageAccountKeys = azurenative.storage.listStorageAccountKeysOutput({
+      resourceGroupName: resourceGroup.name,
+      accountName: storageAccount.name,
+    });
 
-    // new azurenative.storage.BlobServiceProperties("blobServiceProperties", {
-    //   accountName: storageAccount.name,
-    //   blobServicesName: "default",
-    //   resourceGroupName: resourceGroup.name,
-    //   isVersioningEnabled: true,
-    //   cors: {
-    //     corsRules: [
-    //       {
-    //         allowedHeaders: ["*"],
-    //         allowedMethods: ["GET", "HEAD", "PUT"],
-    //         allowedOrigins: ["*"],
-    //         exposedHeaders: ["*"],
-    //         maxAgeInSeconds: 3600,
-    //       },
-    //     ],
-    //   },
-    // });
+    new azurenative.storage.BlobServiceProperties("blobServiceProperties", {
+      accountName: storageAccount.name,
+      blobServicesName: "default",
+      resourceGroupName: resourceGroup.name,
+      isVersioningEnabled: true,
+      cors: {
+        corsRules: [
+          {
+            allowedHeaders: ["*"],
+            allowedMethods: ["GET", "HEAD", "PUT"],
+            allowedOrigins: ["*"],
+            exposedHeaders: ["*"],
+            maxAgeInSeconds: 3600,
+          },
+        ],
+      },
+    });
 
-    // const applicationInsights = buildApplicationInsights(resourceGroup);
+    const applicationInsights = buildApplicationInsights(resourceGroup);
 
-    // new azurenative.monitor.DiagnosticSetting("storage-account-diagnostic-setting", {
-    //   resourceUri: storageAccount.id,
-    //   logs: [],
-    //   metrics: [
-    //     {
-    //       enabled: true,
-    //       category: "Transaction",
-    //       retentionPolicy: {
-    //         days: 0,
-    //         enabled: false,
-    //       },
-    //     },
-    //   ],
-    //   workspaceId: applicationInsights.workspace.id,
-    // });
+    new azurenative.monitor.DiagnosticSetting("storage-account-diagnostic-setting", {
+      resourceUri: storageAccount.id,
+      logs: [],
+      metrics: [
+        {
+          enabled: true,
+          category: "Transaction",
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      workspaceId: applicationInsights.workspace.id,
+    });
 
-    // new azurenative.monitor.DiagnosticSetting("storage-account-blobs-diagnostic-setting", {
-    //   resourceUri: azurenative.storage.getBlobServicePropertiesOutput({
-    //     blobServicesName: "default",
-    //     accountName: storageAccount.name,
-    //     resourceGroupName: resourceGroup.name,
-    //   }).id,
-    //   logs: [
-    //     {
-    //       categoryGroup: "allLogs",
-    //       enabled: true,
-    //       retentionPolicy: {
-    //         days: 0,
-    //         enabled: false,
-    //       },
-    //     },
-    //   ],
-    //   metrics: [
-    //     {
-    //       enabled: true,
-    //       category: "Transaction",
-    //       retentionPolicy: {
-    //         days: 0,
-    //         enabled: false,
-    //       },
-    //     },
-    //   ],
-    //   workspaceId: applicationInsights.workspace.id,
-    // });
+    new azurenative.monitor.DiagnosticSetting("storage-account-blobs-diagnostic-setting", {
+      resourceUri: azurenative.storage.getBlobServicePropertiesOutput({
+        blobServicesName: "default",
+        accountName: storageAccount.name,
+        resourceGroupName: resourceGroup.name,
+      }).id,
+      logs: [
+        {
+          categoryGroup: "allLogs",
+          enabled: true,
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      metrics: [
+        {
+          enabled: true,
+          category: "Transaction",
+          retentionPolicy: {
+            days: 0,
+            enabled: false,
+          },
+        },
+      ],
+      workspaceId: applicationInsights.workspace.id,
+    });
 
-    // // Wait for the storage account and resource group to be created before deploying further resources
-    // const { functionApp, cosmosDbAccount, communicationService, emailDomain, aiSearchService, mediaBlobContainer } =
-    //   $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
-    //     async ([storageAccount, resourceGroup, storageAccountKeys]) => {
-    //       const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
-    //       const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
-    //       const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
-    //       const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
-    //       const { aiSearchService } = await buildAiSearch(resourceGroup, applicationInsights.workspace);
+    // Wait for the storage account and resource group to be created before deploying further resources
+    const { functionApp, cosmosDbAccount, communicationService, emailDomain, aiSearchService, mediaBlobContainer } =
+      $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
+        async ([storageAccount, resourceGroup, storageAccountKeys]) => {
+          const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
+          const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
+          const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
+          const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
+          const { aiSearchService } = await buildAiSearch(resourceGroup, applicationInsights.workspace);
 
-    //       const functionApp = await buildFunctionApp({
-    //         storageAccount,
-    //         resourceGroup,
-    //         turnstileSecret,
-    //         applicationInsightsComponent: applicationInsights.component,
-    //         applicationInsightsWorkspace: applicationInsights.workspace,
-    //         cosmosDbAccount,
-    //         keyVault,
-    //         communicationService,
-    //         emailDomain,
-    //         aiSearchService,
-    //         mediaBlobContainer,
-    //         primaryStorageKey: storageAccountKeys.keys[0].value,
-    //       });
+          const functionApp = await buildFunctionApp({
+            storageAccount,
+            resourceGroup,
+            turnstileSecret,
+            applicationInsightsComponent: applicationInsights.component,
+            applicationInsightsWorkspace: applicationInsights.workspace,
+            cosmosDbAccount,
+            keyVault,
+            communicationService,
+            emailDomain,
+            aiSearchService,
+            mediaBlobContainer,
+            primaryStorageKey: storageAccountKeys.keys[0].value,
+          });
 
-    //       buildStaticSite(storageAccount, resourceGroup);
+          buildStaticSite(storageAccount, resourceGroup);
 
-    //       return {
-    //         functionApp,
-    //         cosmosDbAccount,
-    //         emailDomain,
-    //         aiSearchService,
-    //         communicationService,
-    //         mediaBlobContainer,
-    //       };
-    //     }
-    //   );
+          return {
+            functionApp,
+            cosmosDbAccount,
+            emailDomain,
+            aiSearchService,
+            communicationService,
+            mediaBlobContainer,
+          };
+        }
+      );
 
-    // return {
-    //   primaryStorageKey: storageAccountKeys.keys[0].value,
-    //   websiteUrl: storageAccount.primaryEndpoints.web,
-    //   resourceGroupName: resourceGroup.name,
-    //   functionAppName: functionApp.name,
-    //   cosmosDbEndpoint: cosmosDbAccount.documentEndpoint,
-    //   emailDomain: emailDomain.fromSenderDomain,
-    //   communicationServiceEndpoint: communicationService.hostName,
-    //   aiSearchEndpoint: aiSearchService.endpoint,
-    //   storageAccountName: storageAccount.name,
-    //   mediaContainerName: mediaBlobContainer.name,
-    // };
+    return {
+      primaryStorageKey: storageAccountKeys.keys[0].value,
+      websiteUrl: storageAccount.primaryEndpoints.web,
+      resourceGroupName: resourceGroup.name,
+      functionAppName: functionApp.name,
+      cosmosDbEndpoint: cosmosDbAccount.documentEndpoint,
+      emailDomain: emailDomain.fromSenderDomain,
+      communicationServiceEndpoint: communicationService.hostName,
+      aiSearchEndpoint: aiSearchService.endpoint,
+      storageAccountName: storageAccount.name,
+      mediaContainerName: mediaBlobContainer.name,
+    };
   },
 });
