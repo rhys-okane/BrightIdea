@@ -411,19 +411,21 @@ export async function buildFunctionApp({
   const defaultHostName = functionApp.defaultHostName.apply((h) => `https://${h}`);
   const endpointUrl = $interpolate`${defaultHostName}/runtime/webhooks/blobs?functionName=Host.Functions.EventGridBlobTrigger&code=${blobsExtensionFunctionKey}`;
 
-  new azurenative.eventgrid.SystemTopicEventSubscription("blobEventsTrigger", {
-    eventDeliverySchema: "EventGridSchema",
-    systemTopicName: storageAccount.id,
-    resourceGroupName: resourceGroup.name,
-    destination: {
-      endpointType: "WebHook",
-      endpointUrl: endpointUrl,
-    },
-    filter: {
-      includedEventTypes: ["Microsoft.Storage.BlobCreated"],
-      subjectBeginsWith: "/blobServices/default/containers/" + mediaBlobContainer.name + "/blobs/",
-    },
-  });
+  // new azurenative.eventgrid.SystemTopicEventSubscription("blobEventsTrigger", {
+  //   eventDeliverySchema: "EventGridSchema",
+  //   systemTopicName: storageAccount.id,
+  //   resourceGroupName: resourceGroup.name,
+  //   destination: {
+  //     endpointType: "WebHook",
+  //     endpointUrl: endpointUrl,
+  //   },
+  //   filter: {
+  //     includedEventTypes: ["Microsoft.Storage.BlobCreated"],
+  //     subjectBeginsWith: "/blobServices/default/containers/" + mediaBlobContainer.name + "/blobs/",
+  //   },
+  // });
+
+  // new azurenative.storage.
 
   return functionApp;
 }
