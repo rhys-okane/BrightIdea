@@ -1,46 +1,44 @@
 {
-	"name": "backend",
-	"type": "commonjs",
-	"packageManager": "yarn@4.9.2",
-	"main": "./dist/index.cjs",
-	"scripts": {
-		"start:local": "func start --typescript",
-		"schema:push": "drizzle-kit push",
-		"migrations:migrate": "drizzle-kit migrate",
-		"migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/",
-		"clean": "rm -rf ./dist",
-		"build": "yarn clean && yarn build:makedir && yarn build:copy-files && yarn build:typecheck && yarn build:esbuild && yarn build:zip",
-		"build:makedir": "mkdir -p ./dist",
-		"build:copy-files": "cp ./host.json ./dist/host.json && cp ./package.bundle.json ./dist/package.json",
-		"build:typecheck": "tsc --noEmit",
-		"build:esbuild": "esbuild src/functions/Index.ts --bundle --platform=node  --target=es2020 --outfile=dist/index.cjs --external:@azure/functions-core",
-		"build:zip": "cd dist && zip -r function.zip index.cjs package.json host.json",
-		"local-build": "yarn build:esbuild --watch --sourcemap",
-		"deploy": "yarn build && yarn deploy:push-to-azure",
-		"deploy:push-to-azure": "RESOURCE_GROUP=$(jq -r '.resourceGroupName' ../../.sst/outputs.json) && FUNCTION_APP=$(jq -r '.functionAppName' ../../.sst/outputs.json) && az functionapp deployment source config-zip -g $RESOURCE_GROUP -n $FUNCTION_APP --src dist/function.zip"
-	},
-	"dependencies": {
-		"@azure/communication-email": "^1.1.0",
-		"@azure/cosmos": "^4.9.0",
-		"@azure/functions": "^4.10.0",
-		"@azure/functions-extensions-blob": "^0.2.0-preview",
-		"@azure/identity": "^4.13.0",
-		"@azure/keyvault-secrets": "^4.10.0",
-		"@azure/search-documents": "^12.2.0",
-		"@azure/storage-blob": "^12.29.1",
-		"@hono/zod-validator": "0.7.3",
-		"auth0": "^5.2.0",
-		"drizzle-orm": "0.44.5",
-		"hono": "4.9.9",
-		"jose": "^6.1.3",
-		"typescript": "5.9.3",
-		"ulid": "3.0.1",
-		"zod": "4.1.11"
-	},
-	"devDependencies": {
-		"@types/node": "24.6.1",
-		"dotenv": "17.2.3",
-		"drizzle-kit": "0.31.5",
-		"esbuild": "^0.27.2"
-	}
+  "name": "backend",
+  "type": "commonjs",
+  "packageManager": "yarn@4.9.2",
+  "main": "./dist/index.cjs",
+  "scripts": {
+    "start:local": "func start --typescript",
+    "schema:push": "drizzle-kit push",
+    "migrations:migrate": "drizzle-kit migrate",
+    "migrations:generate": "drizzle-kit generate --driver d1-http --dialect sqlite --schema ./src/database/schema/",
+    "clean": "rm -rf ./dist",
+    "build": "yarn clean && yarn build:makedir && yarn build:copy-files && yarn build:typecheck && yarn build:esbuild && yarn build:zip",
+    "build:makedir": "mkdir -p ./dist",
+    "build:copy-files": "cp ./host.json ./dist/host.json && cp ./package.bundle.json ./dist/package.json",
+    "build:typecheck": "tsc --noEmit",
+    "build:esbuild": "esbuild src/functions/Index.ts --bundle --platform=node  --target=es2020 --outfile=dist/index.cjs --external:@azure/functions-core",
+    "build:zip": "cd dist && zip -r function.zip index.cjs package.json host.json",
+    "local-build": "yarn build:esbuild --watch --sourcemap",
+    "deploy": "yarn build && yarn deploy:push-to-azure",
+    "deploy:push-to-azure": "RESOURCE_GROUP=$(jq -r '.resourceGroupName' ../../.sst/outputs.json) && FUNCTION_APP=$(jq -r '.functionAppName' ../../.sst/outputs.json) && az functionapp deployment source config-zip -g $RESOURCE_GROUP -n $FUNCTION_APP --src dist/function.zip"
+  },
+  "dependencies": {
+    "@azure/communication-email": "^1.1.0",
+    "@azure/cosmos": "^4.9.0",
+    "@azure/functions": "^4.10.0",
+    "@azure/functions-extensions-blob": "^0.2.0-preview",
+    "@azure/identity": "^4.13.0",
+    "@azure/keyvault-secrets": "^4.10.0",
+    "@azure/search-documents": "^12.2.0",
+    "@azure/storage-blob": "^12.29.1",
+    "@hono/zod-validator": "0.7.3",
+    "auth0": "^5.2.0",
+    "hono": "4.9.9",
+    "jose": "^6.1.3",
+    "typescript": "5.9.3",
+    "ulid": "3.0.1",
+    "zod": "4.1.11"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.1",
+    "dotenv": "17.2.3",
+    "esbuild": "^0.27.2"
+  }
 }
