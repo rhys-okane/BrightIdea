@@ -395,8 +395,6 @@ export async function buildFunctionApp({
     workspaceId: applicationInsightsWorkspace.id,
   });
 
-  const subscriptionId = azurenative.authorization.getClientConfigOutput().subscriptionId;
-
   const hostKeys = azurenative.web.listWebAppHostKeysOutput({
     name: functionApp.name,
     resourceGroupName: resourceGroup.name,
