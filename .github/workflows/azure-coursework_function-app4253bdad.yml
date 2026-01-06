@@ -73,6 +73,7 @@ jobs:
           SST_STAGE: production
 
       - name: Store SST state
+        if: always()
         run: bash ./scripts/store_sst_state.sh
         env:
           SST_STAGE: production
