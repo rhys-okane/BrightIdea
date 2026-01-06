@@ -37,7 +37,12 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
       await createDesignQuery(newDesign);
       await aiSearchIndexDesign(newDesign);
 
-      context.json<APICreateDesignResponse>(
+      // Send email notification asynchronously
+      sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch((error) => {
+        context.env.azureContext.warn("Failed to send design creation notification email", error);
+      });
+
+      return context.json<APICreateDesignResponse>(
         {
           id: newDesign.id,
           name: newDesign.name,
@@ -48,11 +53,6 @@ export function listenForCreateDesignPOSTRequest(app: HonoApp) {
         },
         201
       );
-
-      // Send email notification asynchronously
-      await sendDesignCreateNotificationEmail(newDesign, context.env.azureContext).catch((error) => {
-        context.env.azureContext.warn("Failed to send design creation notification email", error);
-      });
     }
   );
 }
