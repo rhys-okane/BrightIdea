@@ -65,6 +65,13 @@ jobs:
           DEPLOYMENT_USER_PRINCIPAL_TYPE: ServicePrincipal
           SST_STAGE: production
 
+      - name: Store SST state
+        run: bash ./scripts/store_sst_state.sh
+        env:
+          SST_STAGE: production
+          AZURE_STORAGE_ACCOUNT: brightideacistate
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY_BRIGHTIDEACISTATE }}
+
       - name: Deploy backend
         working-directory: packages/backend
         run: yarn deploy
