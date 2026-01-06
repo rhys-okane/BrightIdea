@@ -395,6 +395,8 @@ export async function buildFunctionApp({
     workspaceId: applicationInsightsWorkspace.id,
   });
 
+  const subscriptionId = azurenative.authorization.getClientConfigOutput().subscriptionId;
+
   const hostKeys = azurenative.web.listWebAppHostKeysOutput({
     name: functionApp.name,
     resourceGroupName: resourceGroup.name,
@@ -411,7 +413,7 @@ export async function buildFunctionApp({
   const endpointUrl = $interpolate`
   ${defaultHostName}/runtime/webhooks/EventGrid?functionName=${functionApp.name}&code=${functionKey}`;
 
-  const containerScope = $interpolate`/subscriptions/${azurenative.config.subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}/blobServices/default/containers/${mediaBlobContainer.name}`;
+  const containerScope = $interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storageAccount.name}/blobServices/default/containers/${mediaBlobContainer.name}`;
 
   const eventSubWebhook = new azurenative.eventgrid.EventSubscription("blobEventsWH", {
     scope: containerScope,
