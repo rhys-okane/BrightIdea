@@ -326,7 +326,23 @@ export async function buildFunctionApp({
       principalId: identity.principalId,
       principalType: "ServicePrincipal",
       roleDefinitionId: storageBlobDataContributorRole.id,
-      scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${mediaBlobContainer.name}`,
+      // scope: $interpolate`${storageAccount.id}/blobServices/default/containers/${mediaBlobContainer.name}`,
+      scope: storageAccount.id,
+    });
+
+    // Grant access to the media container quueue
+    const STORAGE_QUEUE_DATA_CONTRIBUTOR = "974c5e8b-45b9-4653-ba55-5f855dd0fb88";
+
+    const storageQueueDataContributorRole = azurenative.authorization.getRoleDefinitionOutput({
+      roleDefinitionId: STORAGE_QUEUE_DATA_CONTRIBUTOR,
+      scope: storageAccount.id,
+    });
+
+    new azurenative.authorization.RoleAssignment("functionAppQueueAccess", {
+      principalId: identity.principalId,
+      principalType: "ServicePrincipal",
+      roleDefinitionId: storageQueueDataContributorRole.id,
+      scope: storageAccount.id,
     });
 
     // AI Search index access
