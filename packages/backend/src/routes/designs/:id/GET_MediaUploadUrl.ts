@@ -7,7 +7,7 @@ import { ulid } from "ulid";
 import { mediaContainerName, sharedKeyCredential, storageAccountName } from "@src/blobs/ContainerClient";
 
 export function listenForGETMediaUploadUrl(honoApp: HonoApp) {
-  honoApp.get("/designs/:id/media-upload-url", adminRequired, getDesign, async (context) => {
+  honoApp.get("/api/designs/:id/media-upload-url", adminRequired, getDesign, async (context) => {
     const expiresOn = new Date(new Date().getTime() + 15 * 60 * 1000); // 15 minutes from now
     const permissions = BlobSASPermissions.parse("cw"); // Create and write permissions
 

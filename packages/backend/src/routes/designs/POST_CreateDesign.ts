@@ -11,7 +11,7 @@ import { aiSearchIndexDesign } from "@src/search/actions/IndexDesign";
 
 export function listenForCreateDesignPOSTRequest(app: HonoApp) {
   app.post(
-    "/designs",
+    "/api/designs",
     validateTurnstileTokenFromJsonBody,
     zValidator("json", apiCreateDesignRequestSchema),
     async (context) => {

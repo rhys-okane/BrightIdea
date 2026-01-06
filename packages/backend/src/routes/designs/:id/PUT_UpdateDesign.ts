@@ -10,7 +10,7 @@ import { sendDesignUpdateNotificationEmail } from "@src/email/emails/SendDesignU
 
 export function listenForUpdateDesignPUTRequest(app: HonoApp) {
   app.put(
-    "/designs/:id",
+    "/api/designs/:id",
     validateTurnstileTokenFromJsonBody,
     validateDesignOwnership,
     zValidator("json", apiUpdateDesignRequestSchema),

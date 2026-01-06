@@ -28,7 +28,7 @@ const determineCorrectMiddlewareChain = createMiddleware(async (context, next) =
 });
 
 export function listenForDeleteDesignDELETERequest(app: HonoApp) {
-  app.delete("/designs/:id", getDesign, determineCorrectMiddlewareChain, async (context) => {
+  app.delete("/api/designs/:id", getDesign, determineCorrectMiddlewareChain, async (context) => {
     await deleteDesignQuery(context.var.design.id);
     await aiSearchDeleteDesign(context.var.design);
 

@@ -10,7 +10,7 @@ import { aiSearchSearchDesigns } from "@src/search/actions/SearchDesigns";
 import { designSearchIndexDocumentToSearchResponse } from "@src/search/utils/DesignSearchModelToSearchResponse";
 
 export function listenForGetSearchDesignsGETRequest(app: HonoApp) {
-  app.get("/designs/search", zValidator("query", apiSearchDesignsRequestSchema), async (context) => {
+  app.get("/api/designs/search", zValidator("query", apiSearchDesignsRequestSchema), async (context) => {
     const queryParams = context.req.valid("query");
 
     const { items, totalCount } = await aiSearchSearchDesigns(

@@ -415,17 +415,17 @@ export async function buildFunctionApp({
 
   console.log(endpointUrl);
 
-  // const eventSubscriptionWebhook = new azurenative.eventgrid.EventSubscription("blobEventsTrigger", {
-  //   scope: containerScope,
-  //   eventDeliverySchema: "EventGridSchema",
-  //   destination: {
-  //     endpointType: "WebHook",
-  //     endpointUrl: endpointUrl,
-  //   },
-  //   filter: {
-  //     includedEventTypes: ["Microsoft.Storage.BlobCreated"],
-  //   },
-  // });
+  const eventSubscriptionWebhook = new azurenative.eventgrid.EventSubscription("blobEventsTrigger", {
+    scope: containerScope,
+    eventDeliverySchema: "EventGridSchema",
+    destination: {
+      endpointType: "WebHook",
+      endpointUrl: endpointUrl,
+    },
+    filter: {
+      includedEventTypes: ["Microsoft.Storage.BlobCreated"],
+    },
+  });
 
   return functionApp;
 }

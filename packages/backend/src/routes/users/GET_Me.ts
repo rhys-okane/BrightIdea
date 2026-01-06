@@ -4,7 +4,7 @@ import { AUTH0_ADMIN_ROLE_ID } from "@src/constants/Auth0Constants";
 import { authRequired } from "@src/middleware/AuthRequired";
 
 export function listenForUserMeGETRequest(app: HonoApp) {
-  app.get("/users/me", authRequired, async (context) => {
+  app.get("/api/users/me", authRequired, async (context) => {
     const jwtPayload = context.get("jwtPayload");
 
     const roles = await auth0ManagementClient.users.roles.list(jwtPayload.sub);

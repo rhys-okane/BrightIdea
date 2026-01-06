@@ -5,7 +5,7 @@ import { adminRequired } from "@src/middleware/AdminRequired";
 import { getDesign } from "@src/middleware/GetDesign";
 
 export function listenForDELETEMediaFileRequest(app: HonoApp) {
-  app.delete("/designs/:id/:fileName", adminRequired, getDesign, async (context) => {
+  app.delete("/api/designs/:id/:fileName", adminRequired, getDesign, async (context) => {
     const fileName = context.req.param("fileName");
     const design = context.var.design;
     if (!design.mediaFileNames.includes(fileName)) {
