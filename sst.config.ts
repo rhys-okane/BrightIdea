@@ -110,42 +110,50 @@ export default $config({
     });
 
     // Wait for the storage account and resource group to be created before deploying further resources
-    const { functionApp, cosmosDbAccount, communicationService, emailDomain, aiSearchService, mediaBlobContainer } =
-      $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
-        async ([storageAccount, resourceGroup, storageAccountKeys]) => {
-          const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
-          const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
-          const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
-          const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
-          const { aiSearchService } = await buildAiSearch(resourceGroup, applicationInsights.workspace);
+    const {
+      functionApp,
+      cosmosDbAccount,
+      communicationService,
+      emailDomain,
+      aiSearchService,
+      mediaBlobContainer,
+      staticSite,
+    } = $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
+      async ([storageAccount, resourceGroup, storageAccountKeys]) => {
+        const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
+        const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
+        const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
+        const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
+        const { aiSearchService } = await buildAiSearch(resourceGroup, applicationInsights.workspace);
 
-          const functionApp = await buildFunctionApp({
-            storageAccount,
-            resourceGroup,
-            turnstileSecret,
-            applicationInsightsComponent: applicationInsights.component,
-            applicationInsightsWorkspace: applicationInsights.workspace,
-            cosmosDbAccount,
-            keyVault,
-            communicationService,
-            emailDomain,
-            aiSearchService,
-            mediaBlobContainer,
-            primaryStorageKey: storageAccountKeys.keys[0].value,
-          });
+        const functionApp = await buildFunctionApp({
+          storageAccount,
+          resourceGroup,
+          turnstileSecret,
+          applicationInsightsComponent: applicationInsights.component,
+          applicationInsightsWorkspace: applicationInsights.workspace,
+          cosmosDbAccount,
+          keyVault,
+          communicationService,
+          emailDomain,
+          aiSearchService,
+          mediaBlobContainer,
+          primaryStorageKey: storageAccountKeys.keys[0].value,
+        });
 
-          buildStaticSite(storageAccount, resourceGroup);
+        const staticSite = buildStaticSite(storageAccount, resourceGroup);
 
-          return {
-            functionApp,
-            cosmosDbAccount,
-            emailDomain,
-            aiSearchService,
-            communicationService,
-            mediaBlobContainer,
-          };
-        }
-      );
+        return {
+          functionApp,
+          cosmosDbAccount,
+          emailDomain,
+          aiSearchService,
+          communicationService,
+          mediaBlobContainer,
+          staticSite,
+        };
+      }
+    );
 
     return {
       primaryStorageKey: storageAccountKeys.keys[0].value,
@@ -158,6 +166,7 @@ export default $config({
       aiSearchEndpoint: aiSearchService.endpoint,
       storageAccountName: storageAccount.name,
       mediaContainerName: mediaBlobContainer.name,
+      staticSiteContainerName: staticSite.containerName,
     };
   },
 });
