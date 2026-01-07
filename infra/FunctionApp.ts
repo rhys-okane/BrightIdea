@@ -1,11 +1,17 @@
-const auth0Domain = process.env["AUTH0_MANAGEMENT_DOMAIN"];
-const auth0ManagementClientIdValue = process.env["AUTH0_MANAGEMENT_CLIENT_ID"];
-if (!auth0Domain) {
+const domain = process.env["AUTH0_MANAGEMENT_DOMAIN"];
+const clientId = process.env["AUTH0_MANAGEMENT_CLIENT_ID"];
+const clientSecret = process.env["AUTH0_MANAGEMENT_CLIENT_SECRET"];
+
+if (!domain) {
   throw new Error("Missing AUTH0_MANAGEMENT_DOMAIN environment variable");
 }
 
-if (!auth0ManagementClientIdValue) {
+if (!clientId) {
   throw new Error("Missing AUTH0_MANAGEMENT_CLIENT_ID environment variable");
+}
+
+if (!clientSecret) {
+  throw new Error("Missing AUTH0_MANAGEMENT_CLIENT_SECRET environment variable");
 }
 
 interface FunctionAppParameters {
@@ -21,7 +27,6 @@ interface FunctionAppParameters {
   mediaBlobContainer: azurenative.storage.BlobContainer;
   aiSearchService: azurenative.search.Service;
   primaryStorageKey: string;
-  auth0ManagementClientSecret: azurenative.keyvault.Secret;
 }
 export async function buildFunctionApp({
   storageAccount,
@@ -36,7 +41,6 @@ export async function buildFunctionApp({
   mediaBlobContainer,
   aiSearchService,
   primaryStorageKey,
-  auth0ManagementClientSecret,
 }: FunctionAppParameters) {
   const codeContainer = new azurenative.storage.BlobContainer(`function-app-code-zips-${$app.stage}`, {
     resourceGroupName: resourceGroup.name,
@@ -150,15 +154,15 @@ export async function buildFunctionApp({
         },
         {
           name: "AUTH0_MANAGEMENT_DOMAIN",
-          value: auth0Domain,
+          value: domain,
         },
         {
           name: "AUTH0_MANAGEMENT_CLIENT_ID",
-          value: auth0ManagementClientIdValue,
+          value: clientId,
         },
         {
           name: "AUTH0_MANAGEMENT_CLIENT_SECRET",
-          value: $interpolate`@Microsoft.KeyVault(SecretUri=${auth0ManagementClientSecret.properties.secretUriWithVersion})`,
+          value: clientSecret,
         },
         {
           name: "STORAGE_ACCOUNT_NAME",

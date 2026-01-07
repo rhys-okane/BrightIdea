@@ -120,10 +120,7 @@ export default $config({
       staticSite,
     } = $resolve([storageAccount, resourceGroup, storageAccountKeys] as const).apply(
       async ([storageAccount, resourceGroup, storageAccountKeys]) => {
-        const { keyVault, turnstileSecret, auth0ManagementClientSecret } = buildKeyVault(
-          resourceGroup,
-          applicationInsights.workspace
-        );
+        const { keyVault, turnstileSecret } = buildKeyVault(resourceGroup, applicationInsights.workspace);
         const { cosmosDbAccount } = buildCosmosDb(resourceGroup, applicationInsights.workspace);
         const { communicationService, emailDomain } = buildEmailService(resourceGroup, applicationInsights.workspace);
         const { mediaBlobContainer } = buildMediaBlobContainer(resourceGroup, storageAccount);
@@ -142,7 +139,6 @@ export default $config({
           aiSearchService,
           mediaBlobContainer,
           primaryStorageKey: storageAccountKeys.keys[0].value,
-          auth0ManagementClientSecret,
         });
 
         const staticSite = buildStaticSite(storageAccount, resourceGroup);

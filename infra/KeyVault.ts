@@ -1,13 +1,6 @@
 interface KeyVaultOutput {
   keyVault: azurenative.keyvault.Vault;
   turnstileSecret: azurenative.keyvault.Secret;
-  auth0ManagementClientSecret: azurenative.keyvault.Secret;
-}
-
-const auth0ManagementClientSecretValue = process.env["AUTH0_MANAGEMENT_CLIENT_SECRET"];
-
-if (!auth0ManagementClientSecretValue) {
-  throw new Error("Missing AUTH0_MANAGEMENT_CLIENT_SECRET environment variable");
 }
 
 export const buildKeyVault = (
@@ -32,14 +25,6 @@ export const buildKeyVault = (
     vaultName: keyVault.name,
     properties: {
       value: process.env["CLOUDFLARE_TURNSTILE_SECRET_KEY"] || "",
-    },
-  });
-
-  const auth0ManagementClientSecret = new azurenative.keyvault.Secret("auth0-management-client-secret", {
-    resourceGroupName: resourceGroup.name,
-    vaultName: keyVault.name,
-    properties: {
-      value: auth0ManagementClientSecretValue,
     },
   });
 
@@ -71,6 +56,5 @@ export const buildKeyVault = (
   return {
     keyVault,
     turnstileSecret,
-    auth0ManagementClientSecret,
   };
 };
