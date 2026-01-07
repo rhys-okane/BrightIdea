@@ -1,5 +1,6 @@
 - Show frontend
 - Create a design
+- ENSURE FULL CRUD DEMONSTRATED
 - Explain function app
 - Show AI search
 - Log in with auth0
@@ -7,6 +8,8 @@
 - Mention event grid subscription
 - Play one on helmet behind you
 - Show CI pipeline
+- Explain IAC with SST
+- Show SST config
 - Show portal
 - Show application insights
 - Show email sent when design was created
