@@ -1,7 +1,7 @@
-import type {RGBColour, AnimationFrame} from "@shared/types/AnimationFrame";
-import type {PlayableDesign} from "@src/store/types/design/StoreDesign";
-import {useHighBrowStore} from "@src/store/ZustandStore";
-import {useState, useEffect, useCallback, useRef} from "react";
+import type { RGBColour, AnimationFrame } from "@shared/types/AnimationFrame";
+import type { PlayableDesign } from "@src/store/types/design/StoreDesign";
+import { useHighBrowStore } from "@src/store/ZustandStore";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface DesignPlayerState {
 	isPlaying: boolean;
@@ -12,12 +12,12 @@ interface DesignPlayerState {
 const WLED_URL = "http://4.3.2.1/json";
 
 const indexes = [
-	[54, 53, 42, 41, 30, 29, 18, 17, 6, 5],
-	[55, 52, 43, 40, 31, 28, 19, 16, 7, 4],
-	[56, 51, 44, 39, 32, 27, 20, 15, 8, 3],
-	[57, 50, 45, 38, 33, 26, 21, 14, 9, 2],
-	[58, 49, 46, 37, 34, 25, 22, 13, 10, 1],
-	[59, 48, 47, 36, 35, 24, 23, 12, 11, 0],
+	[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+	[10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  [20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+  [30, 31, 33, 33, 34, 35, 36, 37, 38, 39],
+  [40, 41, 44, 44, 44, 45, 46, 47, 48, 49],
+  [50, 51, 55, 55, 55, 55, 56, 57, 58, 59],
 ] as const;
 
 type LedCommand = [number, [number, number, number]];
